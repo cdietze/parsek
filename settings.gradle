@@ -1,0 +1,2 @@
+rootProject.name = 'parsek'
+include 'parsek-jvm'
