@@ -21,5 +21,16 @@ class BasicTest {
         assertTrue(p.parse("b").isFailure)
         assertTrue(p.parse("ba").isFailure)
     }
-}
 
+    @Test
+    fun `should handle End correctly`() {
+        assertTrue(End.parse("").isSuccess)
+        assertTrue(End.parse("a").isFailure)
+
+        val p = p("ab") * End
+        assertTrue(p.parse("").isFailure)
+        assertTrue(p.parse("a").isFailure)
+        assertTrue(p.parse("ab").isSuccess)
+        assertTrue(p.parse("abc").isFailure)
+    }
+}

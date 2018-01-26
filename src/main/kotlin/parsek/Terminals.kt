@@ -4,10 +4,18 @@ object Terminals {
     object End : Parser<Unit> {
         override fun parse(input: String, index: Int): Parsed<Unit> {
             return when {
-                input.length >= index -> Parsed.Success(Unit, index)
+                input.length == index -> Parsed.Success(Unit, index)
                 else -> Parsed.Failure(index, this, input)
             }
         }
+    }
+
+    object Pass : Parser<Unit> {
+        override fun parse(input: String, index: Int): Parsed<Unit> = Parsed.Success(Unit, index)
+    }
+
+    object Fail : Parser<Unit> {
+        override fun parse(input: String, index: Int): Parsed<Unit> = Parsed.Failure(index, this, input)
     }
 
     data class StringParser(val s: String) : Parser<Unit> {
