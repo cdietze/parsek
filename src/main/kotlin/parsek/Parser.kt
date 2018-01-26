@@ -16,7 +16,7 @@ sealed class Parsed<out T> {
     data class Failure(val index: Int, val lastParser: Parser<*>, val input: String) : Parsed<Nothing>() {
         override val isSuccess: Boolean get() = false
         override fun toString(): String =
-                "Parse error while processing $lastParser:\n$input\n${"^".padStart(index + 1)}"
+            "Parse error while processing $lastParser:\n$input\n${"^".padStart(index + 1)}"
     }
 
     abstract val isSuccess: Boolean
@@ -29,8 +29,8 @@ fun <T> Parsed<T>.getOrFail(): Parsed.Success<T> = when (this) {
 }
 
 fun <T, R> Parsed<T>.match(
-        onSuccess: (Parsed.Success<T>) -> R,
-        onFailure: (Parsed.Failure) -> R
+    onSuccess: (Parsed.Success<T>) -> R,
+    onFailure: (Parsed.Failure) -> R
 ): R = when (this) {
     is Parsed.Success -> onSuccess(this)
     is Parsed.Failure -> onFailure(this)
@@ -77,10 +77,10 @@ fun Parser<Any?>.capture(): Capturing = object : Capturing {
         val res = this@capture.parse(input, index)
         return res.flatMap { oldSuccess: Parsed.Success<Any?> ->
             Parsed.Success(
-                    input.substring(
-                            index,
-                            oldSuccess.index
-                    ), oldSuccess.index
+                input.substring(
+                    index,
+                    oldSuccess.index
+                ), oldSuccess.index
             )
         }
     }
@@ -100,23 +100,8 @@ operator fun <A, B> Parser<A>.times(b: Parser<B>): Parser<Pair<A, B>> = Combinat
 
 operator fun <A> Parser<A>.plus(b: Parser<A>): Parser<A> = Combinators.either(listOf(this, b))
 
-fun <A> Parser<A>.rep(): Parser<List<A>> = object : Parser<List<A>> {
-    override fun parse(input: String, index: Int): Parsed<List<A>> {
-        val result = mutableListOf<A>()
-        var lastIndex = index
-        while (true) {
-            val r = this@rep.parse(input, lastIndex)
-            when (r) {
-                is Parsed.Success -> {
-                    lastIndex = r.index
-                    result.add(r.value)
-                }
-                else ->
-                    return Parsed.Success(result, lastIndex)
-            }
-        }
-    }
-}
+fun <A> Parser<A>.rep(sep: Parser<*> = Terminals.Pass): Parser<List<A>> = Combinators.Repeat(this, sep)
+fun <A> Parser<A>.opt(): Parser<A?> = Combinators.Optional(this)
 
 fun <A> P(p: () -> Parser<A>): Parser<A> = object : Parser<A> {
     override fun parse(input: String, index: Int): Parsed<A> = p().parse(input, index)
