@@ -73,18 +73,18 @@ val End: Parser<Unit> = Terminals.End
 fun Parser<Any?>.capture(): Parser<String> = Combinators.Capturing(this)
 
 @JvmName("\$timesUU")
-operator fun Parser<Unit>.times(b: Parser<Unit>): Parser<Unit> = Combinators.sequence(this, b).map { Unit }
+operator fun Parser<Unit>.times(b: Parser<Unit>): Parser<Unit> = Combinators.Seq(this, b).map { Unit }
 
 @JvmName("\$timesUA")
-operator fun <A> Parser<Unit>.times(b: Parser<A>): Parser<A> = Combinators.sequence(this, b).map { it.second }
+operator fun <A> Parser<Unit>.times(b: Parser<A>): Parser<A> = Combinators.Seq(this, b).map { it.second }
 
 @JvmName("\$timesAU")
-operator fun <A> Parser<A>.times(b: Parser<Unit>): Parser<A> = Combinators.sequence(this, b).map { it.first }
+operator fun <A> Parser<A>.times(b: Parser<Unit>): Parser<A> = Combinators.Seq(this, b).map { it.first }
 
 @JvmName("\$timesAB")
-operator fun <A, B> Parser<A>.times(b: Parser<B>): Parser<Pair<A, B>> = Combinators.sequence(this, b)
+operator fun <A, B> Parser<A>.times(b: Parser<B>): Parser<Pair<A, B>> = Combinators.Seq(this, b)
 
-operator fun <A> Parser<A>.plus(b: Parser<A>): Parser<A> = Combinators.either(listOf(this, b))
+operator fun <A> Parser<A>.plus(b: Parser<A>): Parser<A> = Combinators.Either(listOf(this, b))
 
 fun <A> Parser<A>.rep(sep: Parser<*> = Terminals.Pass): Parser<List<A>> = Combinators.Repeat(this, sep)
 fun <A> Parser<A>.opt(): Parser<A?> = Combinators.Optional(this)

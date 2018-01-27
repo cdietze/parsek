@@ -16,10 +16,12 @@ object Combinators {
         }
     }
 
-    fun <A, B> sequence(a: Parser<A>, b: Parser<B>): Parser<Pair<A, B>> =
-        a.flatMap { aValue -> b.map { bValue -> Pair(aValue, bValue) } }
+    data class Seq<A, B>(val a: Parser<A>, val b: Parser<B>) : Parser<Pair<A, B>> {
+        override fun parse(input: String, index: Int): Parsed<Pair<A, B>> =
+            a.flatMap { aValue -> b.map { bValue -> Pair(aValue, bValue) } }.parse(input, index)
+    }
 
-    fun <A> either(ps: List<Parser<A>>): Parser<A> = object : Parser<A> {
+    data class Either<A>(val ps: List<Parser<A>>) : Parser<A> {
         override fun parse(input: String, index: Int): Parsed<A> {
             fun loop(parserIndex: Int): Parsed<A> {
                 return if (parserIndex >= ps.size) Parsed.Failure(index, this, input)
