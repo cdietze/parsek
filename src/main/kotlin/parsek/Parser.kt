@@ -86,6 +86,7 @@ operator fun <A, B> Parser<A>.times(b: Parser<B>): Parser<Pair<A, B>> = Combinat
 
 operator fun <A> Parser<A>.plus(b: Parser<A>): Parser<A> = Combinators.Either(listOf(this, b))
 
+fun <A> Parser<A>.log(name: String, output: (String) -> Unit): Parser<A> = Combinators.Logged(this, name, output)
 fun <A> Parser<A>.rep(sep: Parser<*> = Terminals.Pass): Parser<List<A>> = Combinators.Repeat(this, sep)
 fun <A> Parser<A>.opt(): Parser<A?> = Combinators.Optional(this)
 
