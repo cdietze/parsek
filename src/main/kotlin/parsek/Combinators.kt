@@ -31,10 +31,10 @@ object Combinators {
         }
     }
 
-    fun <A> Parser<A>.log(name: String, output: (String) -> Unit): Parser<A> = object : Parser<A> {
+    data class Logged<A>(val p: Parser<A>, val name: String, val output: (String) -> Unit) : Parser<A> {
         override fun parse(input: String, index: Int): Parsed<A> {
             output("+$name:$index")
-            val result = this@log.parse(input, index)
+            val result = p.parse(input, index)
             result.match(
                 { output("-$name:$index Success(:${it.index})") },
                 { output("-$name:$index Failure") }
