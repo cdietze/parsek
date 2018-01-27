@@ -36,7 +36,7 @@ object Combinators {
             output("+$name:$index")
             val result = p.parse(input, index)
             result.match(
-                { output("-$name:$index Success(:${it.index})") },
+                { output("-$name:$index Success(:${it.index},'${input.substring(index, it.index)}')") },
                 { output("-$name:$index Failure") }
             )
             return result
