@@ -26,6 +26,7 @@ dependencies {
     testCompile "junit:junit:4.12"
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
     testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
+    testCompile project(":").sourceSets.test.output
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
 
