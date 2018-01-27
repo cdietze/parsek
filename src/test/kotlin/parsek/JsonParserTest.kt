@@ -1,6 +1,5 @@
 package parsek
 
-import parsek.Combinators.log
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -50,11 +49,10 @@ class JsonParserTest {
         // TODO: add unicode support
         val string: Parser<Js.Val.Str> =
             (space * p("\"") * p("^[^\"]*".toRegex()).capture() * p("\"")).map { Js.Val.Str(it) }
-                .log("string", ::println)
 
-        val pair: Parser<Pair<String, Js.Val>> = (string.map { it.value } * p(":") * jsonExpr).log("pair", ::println)
+        val pair: Parser<Pair<String, Js.Val>> = (string.map { it.value } * p(":") * jsonExpr)
         val obj: Parser<Js.Val.Obj> =
-            (p("{") * pair.rep(sep = p(",")) * space * p("}")).map { Js.Val.Obj(it) }.log("obj", ::println)
+            (p("{") * pair.rep(sep = p(",")) * space * p("}")).map { Js.Val.Obj(it) }
     }
 
     @Test
