@@ -46,9 +46,11 @@ class JsonParserTest {
 
         val array: Parser<Js.Val.Arr> = (p("[") * jsonExpr.rep(sep = p(",")) * space * p("]")).map { Js.Val.Arr(it) }
 
-        // TODO: add unicode support
+        val escape = p("""^\\((u[0-9a-fA-F]{4})|[bfnrt])""".toRegex())
+        val strChars = p("""^[^"\\]+""".toRegex())
+
         val string: Parser<Js.Val.Str> =
-            (space * p("\"") * p("^[^\"]*".toRegex()).capture() * p("\"")).map { Js.Val.Str(it) }
+            (space * p("\"") * (strChars + escape).rep().capture() * p("\"")).map { Js.Val.Str(it) }
 
         val pair: Parser<Pair<String, Js.Val>> = (string.map { it.value } * p(":") * jsonExpr)
         val obj: Parser<Js.Val.Obj> =
@@ -65,6 +67,20 @@ class JsonParserTest {
     fun `should parse string`() {
         assertEquals(Js.Val.Str(""), string.parse("\"\"").getOrFail().value)
         assertEquals(Js.Val.Str("abc"), string.parse("\"abc\"").getOrFail().value)
+    }
+
+    @Test
+    fun `should parse escaped strings`() {
+        assertEquals(Js.Val.Str("a\\tb"), string.parse(""""a\tb"""").getOrFail().value)
+        assertEquals(Js.Val.Str("a\\b\\f\\n\\r\\tb"), string.parse(""""a\b\f\n\r\tb"""").getOrFail().value)
+        assertEquals(Js.Val.Str("a\\u2665b"), string.parse(""""a\u2665b"""").getOrFail().value)
+    }
+
+    @Test
+    fun `should fail on invalid escaped strings`() {
+        assertTrue(string.parse(""""\x"""").isFailure)
+        assertTrue(string.parse(""""\uxxxx"""").isFailure)
+        assertTrue(string.parse(""""\uab"""").isFailure)
     }
 
     @Test
