@@ -64,27 +64,13 @@ fun <T, R> Parser<T>.map(f: (T) -> R) = object : Parser<R> {
     }
 }
 
-interface Capturing : Parser<String>
-
 fun p(s: String): Parser<Unit> = Terminals.StringParser(s)
 fun p(c: Char): Parser<Unit> = Terminals.CharParser(c)
 fun p(r: Regex): Parser<Unit> = Terminals.RegexParser(r)
 
 val End: Parser<Unit> = Terminals.End
 
-fun Parser<Any?>.capture(): Capturing = object : Capturing {
-    override fun parse(input: String, index: Int): Parsed<String> {
-        val res = this@capture.parse(input, index)
-        return res.flatMap { oldSuccess: Parsed.Success<Any?> ->
-            Parsed.Success(
-                input.substring(
-                    index,
-                    oldSuccess.index
-                ), oldSuccess.index
-            )
-        }
-    }
-}
+fun Parser<Any?>.capture(): Parser<String> = Combinators.Capturing(this)
 
 @JvmName("\$timesUU")
 operator fun Parser<Unit>.times(b: Parser<Unit>): Parser<Unit> = Combinators.sequence(this, b).map { Unit }

@@ -1,6 +1,21 @@
 package parsek
 
 object Combinators {
+
+    data class Capturing(val p: Parser<*>) : Parser<String> {
+        override fun parse(input: String, index: Int): Parsed<String> {
+            val res = p.parse(input, index)
+            return res.flatMap { oldSuccess: Parsed.Success<Any?> ->
+                Parsed.Success(
+                    input.substring(
+                        index,
+                        oldSuccess.index
+                    ), oldSuccess.index
+                )
+            }
+        }
+    }
+
     fun <A, B> sequence(a: Parser<A>, b: Parser<B>): Parser<Pair<A, B>> =
         a.flatMap { aValue -> b.map { bValue -> Pair(aValue, bValue) } }
 
