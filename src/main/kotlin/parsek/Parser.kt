@@ -70,6 +70,12 @@ fun p(r: Regex): Parser<Unit> = Terminals.RegexParser(r)
 
 val End: Parser<Unit> = Terminals.End
 
+fun CharIn(chars: Iterable<Char>): Parser<Unit> = Intrinsics.CharIn(chars)
+fun CharIn(chars: String): Parser<Unit> = Intrinsics.CharIn(chars.asIterable())
+fun CharPred(pred: (Char) -> Boolean): Parser<Unit> = Intrinsics.CharPred(pred)
+fun WhileCharIn(chars: Iterable<Char>, min: Int = 1): Parser<Unit> = Intrinsics.WhileCharIn(chars, min)
+fun WhileCharIn(chars: String, min: Int = 1): Parser<Unit> = Intrinsics.WhileCharIn(chars.asIterable(), min)
+
 fun Parser<Any?>.capture(): Parser<String> = Combinators.Capturing(this)
 
 @JvmName("\$timesUU")
@@ -87,7 +93,15 @@ operator fun <A, B> Parser<A>.times(b: Parser<B>): Parser<Pair<A, B>> = Combinat
 operator fun <A> Parser<A>.plus(b: Parser<A>): Parser<A> = Combinators.Either(listOf(this, b))
 
 fun <A> Parser<A>.log(name: String, output: (String) -> Unit): Parser<A> = Combinators.Logged(this, name, output)
-fun <A> Parser<A>.rep(sep: Parser<*> = Terminals.Pass): Parser<List<A>> = Combinators.Repeat(this, sep)
+
+@JvmName("\$repU")
+fun Parser<Unit>.rep(min: Int = 0, max: Int = Int.MAX_VALUE, sep: Parser<*> = Terminals.Pass): Parser<Unit> =
+    Combinators.Repeat(this, min, max, sep).map { Unit }
+
+@JvmName("\$repA")
+fun <A> Parser<A>.rep(min: Int = 0, max: Int = Int.MAX_VALUE, sep: Parser<*> = Terminals.Pass): Parser<List<A>> =
+    Combinators.Repeat(this, min, max, sep)
+
 fun <A> Parser<A>.opt(): Parser<A?> = Combinators.Optional(this)
 
 fun <A> P(p: () -> Parser<A>): Parser<A> = object : Parser<A> {

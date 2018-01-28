@@ -1,5 +1,6 @@
 package parsek
 
+import parsek.JsonParserTest.Js.Val.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -10,8 +11,8 @@ class JsonParserTest {
             abstract val value: Any?
 
             data class Str(override val value: String) : Val()
-            data class Obj(override val value: List<Pair<String, Val>>) : Val()
-            data class Arr(override val value: List<Val>) : Val()
+            data class Obj(override val value: List<Pair<String, Val>> = listOf()) : Val()
+            data class Arr(override val value: List<Val> = listOf()) : Val()
             data class Num(override val value: Double) : Val()
 
             object False : Val() {
@@ -25,6 +26,9 @@ class JsonParserTest {
             object Null : Val() {
                 override val value: Any? = null
             }
+
+            operator fun get(index: Int): Val = (this as Arr).value[index]
+            operator fun get(field: String): Val = (this as Obj).value.first { it.first == field }.second
         }
     }
 
@@ -32,48 +36,53 @@ class JsonParserTest {
         val jsonExpr: Parser<Js.Val> =
             P { space * (obj + array + string + `true` + `false` + `null` + `number`) * space }
 
-        val space = p("^[ \\r\\n]*".toRegex())
-        val digits = p("^[0-9]+".toRegex())
-        val exponent = p("[eE][+-]?".toRegex()) * digits
+        val space = WhileCharIn(" \r\n", min = 0)
+        val digits = WhileCharIn("0123456789")
+        val exponent = CharIn("eE") * CharIn("+-").opt() * digits
         val fractional = p(".") * digits
-        val integral = p("^[+\\-]?(0|([1-9][0-9]*))".toRegex())
-        val number = (p("[+-]?".toRegex()) * integral * fractional.opt() * exponent.opt()).capture()
-            .map { Js.Val.Num(it.toDouble()) }
+        val integral = CharIn("+-").opt() * (p("0") + CharIn("123456789") * digits.opt())
+        val number = (CharIn("+-").opt() * integral * fractional.opt() * exponent.opt()).capture()
+            .map { Num(it.toDouble()) }
 
         val `null` = p("null").map { Js.Val.Null }
         val `true` = p("true").map { Js.Val.True }
         val `false` = p("false").map { Js.Val.False }
 
-        val array: Parser<Js.Val.Arr> = (p("[") * jsonExpr.rep(sep = p(",")) * space * p("]")).map { Js.Val.Arr(it) }
+        val array: Parser<Arr> =
+            (p("[") * jsonExpr.rep(sep = p(",")) * space * p("]")).map { Arr(it) }
 
-        val escape = p("""^\\((u[0-9a-fA-F]{4})|[bfnrt])""".toRegex())
-        val strChars = p("""^[^"\\]+""".toRegex())
+        val hexDigit = CharIn(('0'..'9') + ('a'..'f') + ('A'..'F'))
+        val unicodeEscape = p("u") * hexDigit * hexDigit * hexDigit * hexDigit
+        val escape = p("\\") * (CharIn("\"/\\bfnrt") + unicodeEscape)
 
-        val string: Parser<Js.Val.Str> =
-            (space * p("\"") * (strChars + escape).rep().capture() * p("\"")).map { Js.Val.Str(it) }
+        val strCharPred: (Char) -> Boolean = { it !in "\"\\" }
+        val strChars = CharPred(strCharPred).rep(min = 1)
+
+        val string: Parser<Str> =
+            (space * p("\"") * (strChars + escape).rep().capture() * p("\"")).map { Str(it) }
 
         val pair: Parser<Pair<String, Js.Val>> = (string.map { it.value } * p(":") * jsonExpr)
-        val obj: Parser<Js.Val.Obj> =
-            (p("{") * pair.rep(sep = p(",")) * space * p("}")).map { Js.Val.Obj(it) }
+        val obj: Parser<Obj> =
+            (p("{") * pair.rep(sep = p(",")) * space * p("}")).map { Obj(it) }
     }
 
     @Test
     fun `should parse num`() {
-        assertEquals(Js.Val.Num(0.0), number.parse("0").getOrFail().value)
-        assertEquals(Js.Val.Num(1230.0), number.parse("1230").getOrFail().value)
+        assertEquals(Num(0.0), number.parse("0").getOrFail().value)
+        assertEquals(Num(1230.0), number.parse("1230").getOrFail().value)
     }
 
     @Test
     fun `should parse string`() {
-        assertEquals(Js.Val.Str(""), string.parse("\"\"").getOrFail().value)
-        assertEquals(Js.Val.Str("abc"), string.parse("\"abc\"").getOrFail().value)
+        assertEquals(Str(""), string.parse("\"\"").getOrFail().value)
+        assertEquals(Str("abc"), string.parse("\"abc\"").getOrFail().value)
     }
 
     @Test
     fun `should parse escaped strings`() {
-        assertEquals(Js.Val.Str("a\\tb"), string.parse(""""a\tb"""").getOrFail().value)
-        assertEquals(Js.Val.Str("a\\b\\f\\n\\r\\tb"), string.parse(""""a\b\f\n\r\tb"""").getOrFail().value)
-        assertEquals(Js.Val.Str("a\\u2665b"), string.parse(""""a\u2665b"""").getOrFail().value)
+        assertEquals(Str("a\\tb"), string.parse(""""a\tb"""").getOrFail().value)
+        assertEquals(Str("a\\b\\f\\n\\r\\tb"), string.parse(""""a\b\f\n\r\tb"""").getOrFail().value)
+        assertEquals(Str("a\\u2665b"), string.parse(""""a\u2665b"""").getOrFail().value)
     }
 
     @Test
@@ -85,23 +94,24 @@ class JsonParserTest {
 
     @Test
     fun `should parse flat expressions`() {
-        assertEquals(Js.Val.Obj(listOf()), jsonExpr.parse("{}").getOrFail().value)
-        assertEquals(Js.Val.Obj(listOf("a" to Js.Val.Str("b"))), jsonExpr.parse("""{"a": "b"}""").getOrFail().value)
+        assertEquals(Obj(listOf()), jsonExpr.parse("{}").getOrFail().value)
+        assertEquals(Obj(listOf("a" to Str("b"))), jsonExpr.parse("""{"a": "b"}""").getOrFail().value)
         assertEquals(
-            Js.Val.Obj(listOf("a" to Js.Val.Str("b"), "c" to Js.Val.Num(5.0))),
+            Obj(listOf("a" to Str("b"), "c" to Num(5.0))),
             jsonExpr.parse("""{"a": "b", "c": 5}""").getOrFail().value
         )
-        assertEquals(Js.Val.Arr(listOf()), jsonExpr.parse("""[]""").getOrFail().value)
-        assertEquals(Js.Val.Arr(listOf(Js.Val.Num(1.0))), jsonExpr.parse("""[1]""").getOrFail().value)
+        assertEquals(Arr(listOf()), jsonExpr.parse("""[]""").getOrFail().value)
+        assertEquals(Arr(listOf(Num(1.0))), jsonExpr.parse("""[1]""").getOrFail().value)
         assertEquals(
-            Js.Val.Arr(listOf(Js.Val.Num(1.0), Js.Val.Num(2.0))),
+            Arr(listOf(Num(1.0), Num(2.0))),
             jsonExpr.parse("""[1, 2]""").getOrFail().value
         )
     }
 
     @Test
     fun `should parse nested expressions`() {
-        assertTrue(jsonExpr.parse("""[{}]""").getOrFail().isSuccess)
-        assertTrue(jsonExpr.parse("""[{},{}]""").getOrFail().isSuccess)
+        assertEquals(Arr(listOf(Obj())), jsonExpr.parse("""[{}]""").getOrFail().value)
+        assertEquals(Arr(listOf(Obj(), Obj())), jsonExpr.parse("""[{},{}]""").getOrFail().value)
+        assertEquals(Obj(listOf("a" to Str("b"))), jsonExpr.parse("""{"a":"b"}""").getOrFail().value)
     }
 }

@@ -29,6 +29,7 @@ object Terminals {
 
     data class CharParser(val c: Char) : Parser<Unit> {
         override fun parse(input: String, index: Int): Parsed<Unit> {
+            // FIXME this will crash when index is beyond the end
             return if (input[index] == c) Parsed.Success(Unit, index + 1)
             else Parsed.Failure(index, this, input)
         }
