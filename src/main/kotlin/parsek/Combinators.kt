@@ -31,6 +31,16 @@ object Combinators {
         }
     }
 
+    // TODO: test + add to api
+    data class Not(val p: Parser<*>) : Parser<Unit> {
+        override fun parse(input: String, index: Int): Parsed<Unit> {
+            return p.parse(input, index).match(
+                { Parsed.Failure(index, this, input) },
+                { Parsed.Success(Unit, index) }
+            )
+        }
+    }
+
     data class Logged<A>(val p: Parser<A>, val name: String, val output: (String) -> Unit) : Parser<A> {
         override fun parse(input: String, index: Int): Parsed<A> {
             output("+$name:$index")
@@ -49,12 +59,20 @@ object Combinators {
         }
     }
 
-    data class Repeat<out A>(val p: Parser<A>, val separator: Parser<*>) : Parser<List<A>> {
+    data class Repeat<out A>(
+        val p: Parser<A>,
+        val min: Int,
+        val max: Int,
+        val separator: Parser<*>
+    ) : Parser<List<A>> {
         override fun parse(input: String, index: Int): Parsed<List<A>> {
             val result = mutableListOf<A>()
             var lastIndex = index
             // TODO: make sure loop is tail recursive
-            fun loop(sep: Parser<*>): Parsed<List<A>> {
+            fun loop(sep: Parser<*>, count: Int): Parsed<List<A>> {
+                if (count >= max) {
+                    return Parsed.Success(result, lastIndex)
+                }
                 val sepResult = sep.parse(input, lastIndex)
                 return sepResult.match(
                     {
@@ -63,15 +81,21 @@ object Combinators {
                             {
                                 result.add(it.value)
                                 lastIndex = it.index
-                                loop(separator)
+                                loop(separator, count + 1)
                             },
-                            { Parsed.Success(result, lastIndex) }
+                            {
+                                if (min <= count) Parsed.Success(result, lastIndex)
+                                else Parsed.Failure(index, this, input)
+                            }
                         )
                     },
-                    { Parsed.Success(result, lastIndex) }
+                    {
+                        if (min <= count) Parsed.Success(result, lastIndex)
+                        else Parsed.Failure(index, this, input)
+                    }
                 )
             }
-            return loop(Terminals.Pass)
+            return loop(Terminals.Pass, 0)
         }
     }
 }

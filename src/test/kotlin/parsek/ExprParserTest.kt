@@ -8,7 +8,7 @@ import kotlin.test.assertEquals
  * https://github.com/lihaoyi/fastparse/blob/master/fastparse/shared/src/test/scala/fastparse/MathTests.scala#L19-L29
  */
 class ExprParserTest {
-    val int: Parser<Int> = p("^([+\\-])?\\d+".toRegex()).capture().map { it.toInt() }
+    val int: Parser<Int> = (CharIn("+-").opt() * WhileCharIn("0123456789")).capture().map { it.toInt() }
 
     val parens: Parser<Int> = P { p("(") * addSub * p(")") }
     val factor: Parser<Int> = int + parens
