@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/cdietze/parsek.svg?branch=master)](https://travis-ci.org/cdietze/parsek)
+
 # Parsek
 
 Parsek is a cross-platform parser combinator library in Kotlin.
