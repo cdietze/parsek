@@ -68,7 +68,6 @@ fun <T, R> Parser<T>.map(f: (T) -> R) = object : Parser<R> {
 
 fun P(c: Char): Parser<Unit> = Terminals.CharParser(c)
 fun P(s: String): Parser<Unit> = Terminals.StringParser(s)
-fun P(r: Regex): Parser<Unit> = Terminals.RegexParser(r)
 fun <A> P(p: () -> Parser<A>): Parser<A> = Combinators.Rule(p)
 
 val End: Parser<Unit> = Terminals.End

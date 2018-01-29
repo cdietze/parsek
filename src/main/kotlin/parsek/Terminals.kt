@@ -34,14 +34,4 @@ object Terminals {
             else Parsed.Failure(index, this, input)
         }
     }
-
-    data class RegexParser(val re: Regex) : Parser<Unit> {
-        override fun parse(input: String, index: Int): Parsed<Unit> {
-            val result = re.find(input.substring(index))
-            return when (result) {
-                null -> Parsed.Failure(index, this, input)
-                else -> Parsed.Success(Unit, index + result.value.length)
-            }
-        }
-    }
 }
