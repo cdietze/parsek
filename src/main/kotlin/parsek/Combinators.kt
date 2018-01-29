@@ -41,6 +41,12 @@ object Combinators {
         }
     }
 
+    data class Rule<A>(val p: () -> Parser<A>) : Parser<A> {
+        val pCache: Parser<A> by lazy(p)
+        override fun parse(input: String, index: Int): Parsed<A> =
+            pCache.parse(input, index)
+    }
+
     data class Logged<A>(val p: Parser<A>, val name: String, val output: (String) -> Unit) : Parser<A> {
         override fun parse(input: String, index: Int): Parsed<A> {
             output("+$name:$index")
