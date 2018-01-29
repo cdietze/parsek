@@ -8,7 +8,7 @@ class BasicTest {
 
     @Test
     fun `should succeed simple samples`() {
-        val p = p("a")
+        val p = P("a")
         assertEquals(Parsed.Success(Unit, 1), p.parse("a"))
         assertEquals(Parsed.Success(Unit, 1), p.parse("ab"))
         assertEquals(Parsed.Success(Unit, 1), p.parse("aa"))
@@ -16,7 +16,7 @@ class BasicTest {
 
     @Test
     fun `should fail simple samples`() {
-        val p = p("a")
+        val p = P("a")
         assertTrue(p.parse("").isFailure)
         assertTrue(p.parse("b").isFailure)
         assertTrue(p.parse("ba").isFailure)
@@ -27,7 +27,7 @@ class BasicTest {
         assertTrue(End.parse("").isSuccess)
         assertTrue(End.parse("a").isFailure)
 
-        val p = p("ab") * End
+        val p = P("ab") * End
         assertTrue(p.parse("").isFailure)
         assertTrue(p.parse("a").isFailure)
         assertTrue(p.parse("ab").isSuccess)
