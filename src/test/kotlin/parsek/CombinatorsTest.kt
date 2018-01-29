@@ -81,3 +81,13 @@ class RepeatTests {
         assertEquals(Parsed.Success(Unit, 1), p.parse("a,"))
     }
 }
+
+class NotTests {
+    @Test
+    fun `should work`() {
+        val p: Parser<Unit> = P("a").not()
+        assertTrue(p.parse("").let { it.isSuccess && it.index == 0 })
+        assertTrue(p.parse("a").let { it.isFailure && it.index == 0 })
+        assertTrue(p.parse("b").let { it.isSuccess && it.index == 0 })
+    }
+}
