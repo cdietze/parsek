@@ -9,8 +9,8 @@ import kotlin.test.assertTrue
 class JsonPerfTest {
     val jsonString = File("src/test/resources/test.json").readText()
 
-    val warmupCycles = 0
-    val testCycles = 1
+    val warmupCycles = 10
+    val testCycles = 10
 
     @Test
     fun `benchmark JSON parser`() {
@@ -25,7 +25,7 @@ class JsonPerfTest {
                 assertTrue(result.isSuccess)
             }
         }
-        println("Ran $testCycles cycle in ${millis}ms")
+        println("Ran $testCycles cycles in ${millis}ms")
     }
 
     @Test
