@@ -70,6 +70,7 @@ fun P(c: Char): Parser<Unit> = Terminals.CharParser(c)
 fun P(s: String): Parser<Unit> = Terminals.StringParser(s)
 fun <A> P(p: () -> Parser<A>): Parser<A> = Combinators.Rule(p)
 
+val Start: Parser<Unit> = Terminals.Start
 val End: Parser<Unit> = Terminals.End
 
 fun CharIn(chars: Iterable<Char>): Parser<Unit> = Intrinsics.CharIn(chars)

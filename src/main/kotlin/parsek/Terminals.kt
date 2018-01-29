@@ -1,6 +1,18 @@
 package parsek
 
 object Terminals {
+    /**
+     * Succeeds when at the start of the input (i.e., index equals 0), fails otherwise.
+     */
+    object Start : Parser<Unit> {
+        override fun parse(input: String, index: Int): Parsed<Unit> =
+            if (index == 0) Parsed.Success(Unit, index)
+            else Parsed.Failure(index, this, input)
+    }
+
+    /**
+     * Succeeds when at the end of the input (i.e., index equals `input.length`), fails otherwise.
+     */
     object End : Parser<Unit> {
         override fun parse(input: String, index: Int): Parsed<Unit> {
             return when {

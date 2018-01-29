@@ -23,6 +23,14 @@ class BasicTest {
     }
 
     @Test
+    fun `should handle Start correctly`() {
+        assertTrue(Start.parse("").isSuccess)
+        assertTrue(Start.parse("a").isSuccess)
+        assertTrue(Start.parse("a", 1).isFailure)
+        assertTrue(Start.parse("ab", 1).isFailure)
+    }
+
+    @Test
     fun `should handle End correctly`() {
         assertTrue(End.parse("").isSuccess)
         assertTrue(End.parse("a").isFailure)
