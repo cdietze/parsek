@@ -31,7 +31,10 @@ object Combinators {
         }
     }
 
-    // TODO: test + add to api
+    /**
+     * Wraps another parser and succeeds if it fails and fails if it succeeds.
+     * Does not consume any input in either case.
+     */
     data class Not(val p: Parser<*>) : Parser<Unit> {
         override fun parse(input: String, index: Int): Parsed<Unit> {
             return p.parse(input, index).match(
