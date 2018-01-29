@@ -39,31 +39,31 @@ class JsonParserTest {
         val space = WhileCharIn(" \r\n", min = 0)
         val digits = WhileCharIn("0123456789")
         val exponent = CharIn("eE") * CharIn("+-").opt() * digits
-        val fractional = p(".") * digits
-        val integral = CharIn("+-").opt() * (p("0") + CharIn("123456789") * digits.opt())
+        val fractional = P(".") * digits
+        val integral = CharIn("+-").opt() * (P("0") + CharIn("123456789") * digits.opt())
         val number = (CharIn("+-").opt() * integral * fractional.opt() * exponent.opt()).capture()
             .map { Num(it.toDouble()) }
 
-        val `null` = p("null").map { Js.Val.Null }
-        val `true` = p("true").map { Js.Val.True }
-        val `false` = p("false").map { Js.Val.False }
+        val `null` = P("null").map { Js.Val.Null }
+        val `true` = P("true").map { Js.Val.True }
+        val `false` = P("false").map { Js.Val.False }
 
         val array: Parser<Arr> =
-            (p("[") * jsonExpr.rep(sep = p(",")) * space * p("]")).map { Arr(it) }
+            (P("[") * jsonExpr.rep(sep = P(",")) * space * P("]")).map { Arr(it) }
 
         val hexDigit = CharIn(('0'..'9') + ('a'..'f') + ('A'..'F'))
-        val unicodeEscape = p("u") * hexDigit * hexDigit * hexDigit * hexDigit
-        val escape = p("\\") * (CharIn("\"/\\bfnrt") + unicodeEscape)
+        val unicodeEscape = P("u") * hexDigit * hexDigit * hexDigit * hexDigit
+        val escape = P("\\") * (CharIn("\"/\\bfnrt") + unicodeEscape)
 
         val strCharPred: (Char) -> Boolean = { it !in "\"\\" }
         val strChars = CharPred(strCharPred).rep(min = 1)
 
         val string: Parser<Str> =
-            (space * p("\"") * (strChars + escape).rep().capture() * p("\"")).map { Str(it) }
+            (space * P("\"") * (strChars + escape).rep().capture() * P("\"")).map { Str(it) }
 
-        val pair: Parser<Pair<String, Js.Val>> = (string.map { it.value } * p(":") * jsonExpr)
+        val pair: Parser<Pair<String, Js.Val>> = (string.map { it.value } * P(":") * jsonExpr)
         val obj: Parser<Obj> =
-            (p("{") * pair.rep(sep = p(",")) * space * p("}")).map { Obj(it) }
+            (P("{") * pair.rep(sep = P(",")) * space * P("}")).map { Obj(it) }
     }
 
     @Test

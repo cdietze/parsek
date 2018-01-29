@@ -64,9 +64,10 @@ fun <T, R> Parser<T>.map(f: (T) -> R) = object : Parser<R> {
     }
 }
 
-fun p(s: String): Parser<Unit> = Terminals.StringParser(s)
-fun p(c: Char): Parser<Unit> = Terminals.CharParser(c)
-fun p(r: Regex): Parser<Unit> = Terminals.RegexParser(r)
+fun P(c: Char): Parser<Unit> = Terminals.CharParser(c)
+fun P(s: String): Parser<Unit> = Terminals.StringParser(s)
+fun P(r: Regex): Parser<Unit> = Terminals.RegexParser(r)
+fun <A> P(p: () -> Parser<A>): Parser<A> = Combinators.Rule(p)
 
 val End: Parser<Unit> = Terminals.End
 
@@ -92,6 +93,8 @@ operator fun <A, B> Parser<A>.times(b: Parser<B>): Parser<Pair<A, B>> = Combinat
 
 operator fun <A> Parser<A>.plus(b: Parser<A>): Parser<A> = Combinators.Either(listOf(this, b))
 
+operator fun <A> Parser<A>.not(): Parser<Unit> = Combinators.Not(this)
+
 fun <A> Parser<A>.log(name: String, output: (String) -> Unit): Parser<A> = Combinators.Logged(this, name, output)
 
 @JvmName("\$repU")
@@ -104,4 +107,3 @@ fun <A> Parser<A>.rep(min: Int = 0, max: Int = Int.MAX_VALUE, sep: Parser<*> = T
 
 fun <A> Parser<A>.opt(): Parser<A?> = Combinators.Optional(this)
 
-fun <A> P(p: () -> Parser<A>): Parser<A> = Combinators.Rule(p)
