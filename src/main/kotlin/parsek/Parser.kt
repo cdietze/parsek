@@ -104,6 +104,4 @@ fun <A> Parser<A>.rep(min: Int = 0, max: Int = Int.MAX_VALUE, sep: Parser<*> = T
 
 fun <A> Parser<A>.opt(): Parser<A?> = Combinators.Optional(this)
 
-fun <A> P(p: () -> Parser<A>): Parser<A> = object : Parser<A> {
-    override fun parse(input: String, index: Int): Parsed<A> = p().parse(input, index)
-}
+fun <A> P(p: () -> Parser<A>): Parser<A> = Combinators.Rule(p)
