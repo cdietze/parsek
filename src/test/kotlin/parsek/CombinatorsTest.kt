@@ -4,6 +4,16 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+class FilterCombinator {
+    @Test
+    fun `should work`() {
+        val p = CharIn("ab").capture().filter { it == "a" }
+        assertTrue(p.parse("a").isSuccess)
+        assertTrue(p.parse("b").isFailure)
+        assertTrue(p.parse("c").isFailure)
+    }
+}
+
 class SequenceCombinator {
     @Test
     fun `should succeed simple samples`() {

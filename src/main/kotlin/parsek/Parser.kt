@@ -48,6 +48,7 @@ interface Parser<out T> {
 
 fun <T, R> Parser<T>.map(f: (T) -> R) = Combinators.Mapped(this, f)
 fun <T, R> Parser<T>.flatMap(f: (T) -> Parser<R>): Parser<R> = Combinators.FlatMapped(this, f)
+fun <T> Parser<T>.filter(pred: (T) -> Boolean): Parser<T> = Combinators.Filtered(this, pred)
 
 fun P(c: Char): Parser<Unit> = Terminals.CharParser(c)
 fun P(s: String): Parser<Unit> = Terminals.StringParser(s)
