@@ -46,25 +46,8 @@ interface Parser<out T> {
     fun parse(input: String, index: Int = 0): Parsed<T>
 }
 
-fun <T, R> Parser<T>.flatMap(f: (T) -> Parser<R>): Parser<R> = object : Parser<R> {
-    override fun parse(input: String, index: Int): Parsed<R> {
-        val parsed = this@flatMap.parse(input, index)
-        return when (parsed) {
-            is Parsed.Success -> f(parsed.value).parse(input, parsed.index)
-            is Parsed.Failure -> parsed
-        }
-    }
-}
-
-fun <T, R> Parser<T>.map(f: (T) -> R) = object : Parser<R> {
-    override fun parse(input: String, index: Int): Parsed<R> {
-        val parsed = this@map.parse(input, index)
-        return when (parsed) {
-            is Parsed.Success -> parsed.map(f)
-            is Parsed.Failure -> parsed
-        }
-    }
-}
+fun <T, R> Parser<T>.map(f: (T) -> R) = Combinators.Mapped(this, f)
+fun <T, R> Parser<T>.flatMap(f: (T) -> Parser<R>): Parser<R> = Combinators.FlatMapped(this, f)
 
 fun P(c: Char): Parser<Unit> = Terminals.CharParser(c)
 fun P(s: String): Parser<Unit> = Terminals.StringParser(s)
