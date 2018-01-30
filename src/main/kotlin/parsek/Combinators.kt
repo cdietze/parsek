@@ -22,6 +22,16 @@ object Combinators {
         }
     }
 
+    data class Filtered<A>(val p: Parser<A>, val pred: (A) -> Boolean) : Parser<A> {
+        override fun parse(input: String, index: Int): Parsed<A> {
+            val parsed = p.parse(input, index)
+            return when (parsed) {
+                is Parsed.Success -> if (pred(parsed.value)) parsed else Parsed.Failure(index, this, input)
+                is Parsed.Failure -> parsed
+            }
+        }
+    }
+
     data class Capturing(val p: Parser<*>) : Parser<String> {
         override fun parse(input: String, index: Int): Parsed<String> {
             val res = p.parse(input, index)
