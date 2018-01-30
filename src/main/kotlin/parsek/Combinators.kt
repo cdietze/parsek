@@ -2,6 +2,26 @@ package parsek
 
 object Combinators {
 
+    data class Mapped<A, B>(val p: Parser<A>, val f: (A) -> B) : Parser<B> {
+        override fun parse(input: String, index: Int): Parsed<B> {
+            val parsed = p.parse(input, index)
+            return when (parsed) {
+                is Parsed.Success -> parsed.map(f)
+                is Parsed.Failure -> parsed
+            }
+        }
+    }
+
+    data class FlatMapped<A, B>(val p: Parser<A>, val f: (A) -> Parser<B>) : Parser<B> {
+        override fun parse(input: String, index: Int): Parsed<B> {
+            val parsed = p.parse(input, index)
+            return when (parsed) {
+                is Parsed.Success -> f(parsed.value).parse(input, parsed.index)
+                is Parsed.Failure -> parsed
+            }
+        }
+    }
+
     data class Capturing(val p: Parser<*>) : Parser<String> {
         override fun parse(input: String, index: Int): Parsed<String> {
             val res = p.parse(input, index)
