@@ -1,5 +1,8 @@
 package parsek
 
+import parsek.MutableParsed.MutableFailure
+import parsek.MutableParsed.MutableSuccess
+
 object Combinators {
 
     data class Mapped<A, out B>(val p: Parser<A>, val f: (A) -> B) : Parser<B>() {

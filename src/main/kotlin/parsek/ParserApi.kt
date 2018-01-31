@@ -13,14 +13,14 @@ abstract class Parser<out T> {
      */
     abstract fun parseRec(ctx: ParserCtx, index: Int): MutableParsed
 
-    protected fun <A> succeed(ctx: ParserCtx, value: A, index: Int): MutableSuccess {
+    protected fun <A> succeed(ctx: ParserCtx, value: A, index: Int): MutableParsed.MutableSuccess {
         return ctx.success.apply {
             this.value = value
             this.index = index
         }
     }
 
-    protected fun fail(ctx: ParserCtx, index: Int): MutableFailure {
+    protected fun fail(ctx: ParserCtx, index: Int): MutableParsed.MutableFailure {
         return ctx.failure.apply {
             this.index = index
             this.lastParser = this@Parser
