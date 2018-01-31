@@ -1,7 +1,5 @@
 package parsek
 
-import kotlin.jvm.JvmName
-
 sealed class Parsed<out T> {
     abstract val index: Int
 
@@ -42,54 +40,28 @@ fun <T, R> Parsed<T>.flatMap(f: (Parsed.Success<T>) -> Parsed<R>): Parsed<R> = m
 fun <T, R> Parsed<T>.map(f: (T) -> R): Parsed<R> = this.match({ s -> s.map(f) }, { it })
 fun <T, R> Parsed.Success<T>.map(f: (T) -> R): Parsed.Success<R> = Parsed.Success(f(value), index)
 
-interface Parser<out T> {
-    fun parse(input: String, index: Int = 0): Parsed<T>
+data class ParserCtx(val input: String) {
+    val success = MutableSuccess()
+    val failure = MutableFailure(input)
 }
 
-fun <T, R> Parser<T>.map(f: (T) -> R) = Combinators.Mapped(this, f)
-fun <T, R> Parser<T>.flatMap(f: (T) -> Parser<R>): Parser<R> = Combinators.FlatMapped(this, f)
-fun <T> Parser<T>.filter(pred: (T) -> Boolean): Parser<T> = Combinators.Filtered(this, pred)
+sealed class MutableParsed() {
+    abstract fun <A> toResult(): Parsed<A>
+}
 
-fun P(c: Char): Parser<Unit> = Terminals.CharParser(c)
-fun P(s: String): Parser<Unit> = Terminals.StringParser(s)
-fun <A> P(p: () -> Parser<A>): Parser<A> = Combinators.Rule(p)
+data class MutableSuccess(
+    var value: Any? = null,
+    var index: Int = 0
+) : MutableParsed() {
+    override fun <A> toResult(): Parsed.Success<A> =
+        Parsed.Success(value as A, index)
+}
 
-val Start: Parser<Unit> = Terminals.Start
-val End: Parser<Unit> = Terminals.End
-
-fun CharIn(chars: Iterable<Char>): Parser<Unit> = Intrinsics.CharIn(chars)
-fun CharIn(chars: String): Parser<Unit> = Intrinsics.CharIn(chars.asIterable())
-fun CharPred(pred: (Char) -> Boolean): Parser<Unit> = Intrinsics.CharPred(pred)
-fun WhileCharIn(chars: Iterable<Char>, min: Int = 1): Parser<Unit> = Intrinsics.WhileCharIn(chars, min)
-fun WhileCharIn(chars: String, min: Int = 1): Parser<Unit> = Intrinsics.WhileCharIn(chars.asIterable(), min)
-
-fun Parser<Any?>.capture(): Parser<String> = Combinators.Capturing(this)
-
-@JvmName("\$timesUU")
-operator fun Parser<Unit>.times(b: Parser<Unit>): Parser<Unit> = Combinators.Seq(this, b).map { Unit }
-
-@JvmName("\$timesUA")
-operator fun <A> Parser<Unit>.times(b: Parser<A>): Parser<A> = Combinators.Seq(this, b).map { it.second }
-
-@JvmName("\$timesAU")
-operator fun <A> Parser<A>.times(b: Parser<Unit>): Parser<A> = Combinators.Seq(this, b).map { it.first }
-
-@JvmName("\$timesAB")
-operator fun <A, B> Parser<A>.times(b: Parser<B>): Parser<Pair<A, B>> = Combinators.Seq(this, b)
-
-operator fun <A> Parser<A>.plus(b: Parser<A>): Parser<A> = Combinators.Either(listOf(this, b))
-
-operator fun <A> Parser<A>.not(): Parser<Unit> = Combinators.Not(this)
-
-fun <A> Parser<A>.log(name: String, output: (String) -> Unit): Parser<A> = Combinators.Logged(this, name, output)
-
-@JvmName("\$repU")
-fun Parser<Unit>.rep(min: Int = 0, max: Int = Int.MAX_VALUE, sep: Parser<*> = Terminals.Pass): Parser<Unit> =
-    Combinators.Repeat(this, min, max, sep).map { Unit }
-
-@JvmName("\$repA")
-fun <A> Parser<A>.rep(min: Int = 0, max: Int = Int.MAX_VALUE, sep: Parser<*> = Terminals.Pass): Parser<List<A>> =
-    Combinators.Repeat(this, min, max, sep)
-
-fun <A> Parser<A>.opt(): Parser<A?> = Combinators.Optional(this)
-
+data class MutableFailure(
+    val input: String,
+    var index: Int = 0,
+    var lastParser: Parser<*>? = null
+) : MutableParsed() {
+    override fun <A> toResult(): Parsed.Failure =
+        Parsed.Failure(index, lastParser!!, input)
+}

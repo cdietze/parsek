@@ -30,6 +30,12 @@ class SequenceCombinator {
         assertTrue(p.parse("ba").isFailure)
         assertTrue(p.parse("aab").isFailure)
     }
+
+    @Test
+    fun `should contain correct value`() {
+        val p = P("a").capture() * P("b").capture()
+        assertEquals(Parsed.Success(Pair("a", "b"), 2), p.parse("ab"))
+    }
 }
 
 class EitherCombinator {

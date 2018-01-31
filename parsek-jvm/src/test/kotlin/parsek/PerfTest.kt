@@ -1,5 +1,6 @@
 package parsek
 
+import org.junit.Ignore
 import org.junit.Test
 import java.io.File
 import kotlin.system.measureTimeMillis
@@ -9,10 +10,11 @@ import kotlin.test.assertTrue
 class JsonPerfTest {
     val jsonString = File("src/test/resources/test.json").readText()
 
-    val warmupCycles = 10
-    val testCycles = 10
+    val warmupCycles = 100
+    val testCycles = 100
 
     @Test
+    @Ignore
     fun `benchmark JSON parser`() {
         println("Running warmup")
         (1..warmupCycles).forEach {
