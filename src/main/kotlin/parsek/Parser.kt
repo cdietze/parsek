@@ -29,27 +29,27 @@ fun <T> Parsed<T>.getOrFail(): Parsed.Success<T> = when (this) {
 }
 
 data class ParserCtx(val input: String) {
-    val success = MutableSuccess()
-    val failure = MutableFailure(input)
+    val success = MutableParsed.MutableSuccess()
+    val failure = MutableParsed.MutableFailure(input)
 }
 
 sealed class MutableParsed {
     abstract fun <A> toResult(): Parsed<A>
-}
 
-data class MutableSuccess(
-    var value: Any? = null,
-    var index: Int = 0
-) : MutableParsed() {
-    override fun <A> toResult(): Parsed.Success<A> =
-        Parsed.Success(value as A, index)
-}
+    data class MutableSuccess(
+        var value: Any? = null,
+        var index: Int = 0
+    ) : MutableParsed() {
+        override fun <A> toResult(): Parsed.Success<A> =
+            Parsed.Success(value as A, index)
+    }
 
-data class MutableFailure(
-    val input: String,
-    var index: Int = 0,
-    var lastParser: Parser<*>? = null
-) : MutableParsed() {
-    override fun <A> toResult(): Parsed.Failure =
-        Parsed.Failure(index, lastParser!!, input)
+    data class MutableFailure(
+        val input: String,
+        var index: Int = 0,
+        var lastParser: Parser<*>? = null
+    ) : MutableParsed() {
+        override fun <A> toResult(): Parsed.Failure =
+            Parsed.Failure(index, lastParser!!, input)
+    }
 }
