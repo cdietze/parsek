@@ -28,24 +28,12 @@ fun <T> Parsed<T>.getOrFail(): Parsed.Success<T> = when (this) {
     else -> error("Parse error: ${this}")
 }
 
-fun <T, R> Parsed<T>.match(
-    onSuccess: (Parsed.Success<T>) -> R,
-    onFailure: (Parsed.Failure) -> R
-): R = when (this) {
-    is Parsed.Success -> onSuccess(this)
-    is Parsed.Failure -> onFailure(this)
-}
-
-fun <T, R> Parsed<T>.flatMap(f: (Parsed.Success<T>) -> Parsed<R>): Parsed<R> = match(f, { it })
-fun <T, R> Parsed<T>.map(f: (T) -> R): Parsed<R> = this.match({ s -> s.map(f) }, { it })
-fun <T, R> Parsed.Success<T>.map(f: (T) -> R): Parsed.Success<R> = Parsed.Success(f(value), index)
-
 data class ParserCtx(val input: String) {
     val success = MutableSuccess()
     val failure = MutableFailure(input)
 }
 
-sealed class MutableParsed() {
+sealed class MutableParsed {
     abstract fun <A> toResult(): Parsed<A>
 }
 
