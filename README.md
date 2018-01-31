@@ -1,3 +1,4 @@
+[![](https://jitpack.io/v/cdietze/parsek.svg)](https://jitpack.io/#cdietze/parsek)
 [![Build Status](https://travis-ci.org/cdietze/parsek.svg?branch=master)](https://travis-ci.org/cdietze/parsek)
 
 # Parsek
