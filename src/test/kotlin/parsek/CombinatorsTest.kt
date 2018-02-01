@@ -18,7 +18,7 @@ class SequenceCombinator {
     @Test
     fun `should succeed simple samples`() {
         val p = P("a") * P("b")
-        assertEquals(Parsed.Success(Unit, 2), p.parse("ab"))
+        assertEquals(ParseResult.Success(Unit, 2), p.parse("ab"))
     }
 
     @Test
@@ -34,7 +34,7 @@ class SequenceCombinator {
     @Test
     fun `should contain correct value`() {
         val p = P("a").capture() * P("b").capture()
-        assertEquals(Parsed.Success(Pair("a", "b"), 2), p.parse("ab"))
+        assertEquals(ParseResult.Success(Pair("a", "b"), 2), p.parse("ab"))
     }
 }
 
@@ -42,10 +42,10 @@ class EitherCombinator {
     @Test
     fun `should succeed simple samples`() {
         val p = (P("a") + P("b")).capture()
-        assertEquals(Parsed.Success("a", 1), p.parse("a"))
-        assertEquals(Parsed.Success("b", 1), p.parse("b"))
-        assertEquals(Parsed.Success("a", 1), p.parse("aa"))
-        assertEquals(Parsed.Success("b", 1), p.parse("ba"))
+        assertEquals(ParseResult.Success("a", 1), p.parse("a"))
+        assertEquals(ParseResult.Success("b", 1), p.parse("b"))
+        assertEquals(ParseResult.Success("a", 1), p.parse("aa"))
+        assertEquals(ParseResult.Success("b", 1), p.parse("ba"))
     }
 
     @Test
@@ -61,11 +61,11 @@ class RepeatTests {
     @Test
     fun `should succeed simple samples`() {
         val p: Parser<Unit> = P("a").rep()
-        assertEquals(Parsed.Success(Unit, 0), p.parse(""))
-        assertEquals(Parsed.Success(Unit, 1), p.parse("a"))
-        assertEquals(Parsed.Success(Unit, 2), p.parse("aa"))
-        assertEquals(Parsed.Success(Unit, 3), p.parse("aaa"))
-        assertEquals(Parsed.Success(Unit, 2), p.parse("aaba"))
+        assertEquals(ParseResult.Success(Unit, 0), p.parse(""))
+        assertEquals(ParseResult.Success(Unit, 1), p.parse("a"))
+        assertEquals(ParseResult.Success(Unit, 2), p.parse("aa"))
+        assertEquals(ParseResult.Success(Unit, 3), p.parse("aaa"))
+        assertEquals(ParseResult.Success(Unit, 2), p.parse("aaba"))
     }
 
     @Test
@@ -80,21 +80,21 @@ class RepeatTests {
     @Test
     fun `should honor max`() {
         val p: Parser<Unit> = P("a").rep(max = 2)
-        assertEquals(Parsed.Success(Unit, 0), p.parse(""))
-        assertEquals(Parsed.Success(Unit, 1), p.parse("a"))
-        assertEquals(Parsed.Success(Unit, 2), p.parse("aa"))
-        assertEquals(Parsed.Success(Unit, 2), p.parse("aaa"))
-        assertEquals(Parsed.Success(Unit, 2), p.parse("aaaa"))
+        assertEquals(ParseResult.Success(Unit, 0), p.parse(""))
+        assertEquals(ParseResult.Success(Unit, 1), p.parse("a"))
+        assertEquals(ParseResult.Success(Unit, 2), p.parse("aa"))
+        assertEquals(ParseResult.Success(Unit, 2), p.parse("aaa"))
+        assertEquals(ParseResult.Success(Unit, 2), p.parse("aaaa"))
     }
 
     @Test
     fun `should honor separator`() {
         val p: Parser<Unit> = P("a").rep(sep = P(","))
-        assertEquals(Parsed.Success(Unit, 0), p.parse(""))
-        assertEquals(Parsed.Success(Unit, 1), p.parse("a"))
-        assertEquals(Parsed.Success(Unit, 3), p.parse("a,a"))
-        assertEquals(Parsed.Success(Unit, 5), p.parse("a,a,a"))
-        assertEquals(Parsed.Success(Unit, 1), p.parse("a,"))
+        assertEquals(ParseResult.Success(Unit, 0), p.parse(""))
+        assertEquals(ParseResult.Success(Unit, 1), p.parse("a"))
+        assertEquals(ParseResult.Success(Unit, 3), p.parse("a,a"))
+        assertEquals(ParseResult.Success(Unit, 5), p.parse("a,a,a"))
+        assertEquals(ParseResult.Success(Unit, 1), p.parse("a,"))
     }
 }
 
