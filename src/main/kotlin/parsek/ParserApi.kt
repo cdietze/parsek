@@ -3,24 +3,28 @@ package parsek
 import kotlin.jvm.JvmName
 
 abstract class Parser<out T> {
-    fun parse(input: String, index: Int = 0): Parsed<T> =
+    /**
+     * Parses the given [input] starting at [index].
+     * Returns the parsed result.
+     */
+    fun parse(input: String, index: Int = 0): ParseResult<T> =
         parseRec(ParserCtx(input), index).toResult()
 
     /**
-     * More performant variant of [parse].
+     * More performant variant of [parse] intended to be used by other parsers.
      * It uses a mutable [ParserCtx] that is passed to recursive [parseRec] calls. Thus avoids
-     * object allocations (e.g. for [Parsed.Success] and [Parsed.Failure] instances.
+     * object allocations (e.g. for [ParseResult.Success] and [ParseResult.Failure] instances.
      */
-    abstract fun parseRec(ctx: ParserCtx, index: Int): MutableParsed
+    abstract fun parseRec(ctx: ParserCtx, index: Int): MutableParseResult
 
-    protected fun <A> succeed(ctx: ParserCtx, value: A, index: Int): MutableParsed.MutableSuccess {
+    protected fun <A> succeed(ctx: ParserCtx, value: A, index: Int): MutableParseResult.MutableSuccess {
         return ctx.success.apply {
             this.value = value
             this.index = index
         }
     }
 
-    protected fun fail(ctx: ParserCtx, index: Int): MutableParsed.MutableFailure {
+    protected fun fail(ctx: ParserCtx, index: Int): MutableParseResult.MutableFailure {
         return ctx.failure.apply {
             this.index = index
             this.lastParser = this@Parser

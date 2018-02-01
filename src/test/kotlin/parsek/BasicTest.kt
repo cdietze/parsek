@@ -9,9 +9,9 @@ class BasicTest {
     @Test
     fun `should succeed simple samples`() {
         val p = P("a")
-        assertEquals(Parsed.Success(Unit, 1), p.parse("a"))
-        assertEquals(Parsed.Success(Unit, 1), p.parse("ab"))
-        assertEquals(Parsed.Success(Unit, 1), p.parse("aa"))
+        assertEquals(ParseResult.Success(Unit, 1), p.parse("a"))
+        assertEquals(ParseResult.Success(Unit, 1), p.parse("ab"))
+        assertEquals(ParseResult.Success(Unit, 1), p.parse("aa"))
     }
 
     @Test

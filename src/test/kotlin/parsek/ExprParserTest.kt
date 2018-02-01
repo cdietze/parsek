@@ -32,20 +32,20 @@ class ExprParserTest {
 
     @Test
     fun `should parse int expressions`() {
-        assertEquals(Parsed.Success(1, 1), int.parse("1"))
-        assertEquals(Parsed.Success(42, 2), int.parse("42"))
-        assertEquals(Parsed.Success(42, 3), int.parse("+42"))
-        assertEquals(Parsed.Success(-42, 3), int.parse("-42"))
+        assertEquals(ParseResult.Success(1, 1), int.parse("1"))
+        assertEquals(ParseResult.Success(42, 2), int.parse("42"))
+        assertEquals(ParseResult.Success(42, 3), int.parse("+42"))
+        assertEquals(ParseResult.Success(-42, 3), int.parse("-42"))
     }
 
     @Test
     fun `should eval simple math expressions`() {
-        assertEquals(Parsed.Success(123, 3), expr.parse("123"))
-        assertEquals(Parsed.Success(2, 3), expr.parse("1+1"))
-        assertEquals(Parsed.Success(2, 3), expr.parse("3-1"))
-        assertEquals(Parsed.Success(6, 3), expr.parse("2*3"))
-        assertEquals(Parsed.Success(3, 3), expr.parse("6/2"))
-        assertEquals(Parsed.Success(2, 3), expr.parse("(2)"))
+        assertEquals(ParseResult.Success(123, 3), expr.parse("123"))
+        assertEquals(ParseResult.Success(2, 3), expr.parse("1+1"))
+        assertEquals(ParseResult.Success(2, 3), expr.parse("3-1"))
+        assertEquals(ParseResult.Success(6, 3), expr.parse("2*3"))
+        assertEquals(ParseResult.Success(3, 3), expr.parse("6/2"))
+        assertEquals(ParseResult.Success(2, 3), expr.parse("(2)"))
     }
 
     @Test
