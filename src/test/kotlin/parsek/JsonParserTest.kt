@@ -36,20 +36,23 @@ class JsonParserTest {
         val jsonExpr: Parser<Js.Val> =
             Rule("jsonExpr") { space * (obj + array + string + `true` + `false` + `null` + `number`) * space }
 
-        val space = WhileCharIn(" \r\n", min = 0)
+        val space = Rule("space") { WhileCharIn(" \r\n", min = 0) }
         val digits = WhileCharIn("0123456789")
         val exponent = CharIn("eE") * CharIn("+-").opt() * digits
         val fractional = P(".") * digits
         val integral = CharIn("+-").opt() * (P("0") + CharIn("123456789") * digits.opt())
-        val number = (CharIn("+-").opt() * integral * fractional.opt() * exponent.opt()).capture()
-            .map { Num(it.toDouble()) }
+        val number = Rule("number") {
+            (CharIn("+-").opt() * integral * fractional.opt() * exponent.opt()).capture()
+                .map { Num(it.toDouble()) }
+        }
 
         val `null` = P("null").map { Js.Val.Null }
         val `true` = P("true").map { Js.Val.True }
         val `false` = P("false").map { Js.Val.False }
 
-        val array: Parser<Arr> =
+        val array: Parser<Arr> = Rule("array") {
             (P("[") * jsonExpr.rep(sep = P(",")) * space * P("]")).map { Arr(it) }
+        }
 
         val hexDigit = CharIn(('0'..'9') + ('a'..'f') + ('A'..'F'))
         val unicodeEscape = P("u") * hexDigit * hexDigit * hexDigit * hexDigit
@@ -58,12 +61,14 @@ class JsonParserTest {
         val strCharPred: (Char) -> Boolean = { it !in "\"\\" }
         val strChars = CharPred(strCharPred).rep(min = 1)
 
-        val string: Parser<Str> =
+        val string: Parser<Str> = Rule("string") {
             (space * P("\"") * (strChars + escape).rep().capture() * P("\"")).map { Str(it) }
+        }
 
-        val pair: Parser<Pair<String, Js.Val>> = (string.map { it.value } * P(":") * jsonExpr)
-        val obj: Parser<Obj> =
+        val pair: Parser<Pair<String, Js.Val>> = Rule("pair") { string.map { it.value } * P(":") * jsonExpr }
+        val obj: Parser<Obj> = Rule("obj") {
             (P("{") * pair.rep(sep = P(",")) * space * P("}")).map { Obj(it) }
+        }
     }
 
     @Test
