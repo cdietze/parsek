@@ -70,6 +70,8 @@ object Combinators {
             }
         }
 
+        // FIXME: add parentheses to keep correct precedence, e.g. currently jsonExpr is printed as
+        // `space * obj + array + string + P("true") + P("false") + P("null") + number * space`
         override fun toString(): String = "$a * $b"
     }
 
