@@ -16,8 +16,9 @@ sealed class ParseResult<out T> {
     data class Failure(override val index: Int, val lastParser: Parser<*>, val input: String) :
         ParseResult<Nothing>() {
         override val isSuccess: Boolean get() = false
+        // TODO: only print part of the input
         override fun toString(): String =
-            "Parse error while processing $lastParser:\n$input\n${"^".padStart(index + 1)}"
+            "Failure at :$index, expected: $lastParser\n$input\n${"^".padStart(index + 1)}"
     }
 
     abstract val isSuccess: Boolean

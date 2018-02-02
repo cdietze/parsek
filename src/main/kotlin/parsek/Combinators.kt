@@ -13,6 +13,8 @@ object Combinators {
                 is MutableFailure -> r
             }
         }
+
+        override fun toString(): String = p.toString()
     }
 
     data class FlatMapped<A, out B>(val p: Parser<A>, val f: (A) -> Parser<B>) : Parser<B>() {
@@ -23,6 +25,8 @@ object Combinators {
                 is MutableFailure -> r
             }
         }
+
+        override fun toString(): String = p.toString()
     }
 
     data class Filtered<A>(val p: Parser<A>, val pred: (A) -> Boolean) : Parser<A>() {
@@ -33,6 +37,9 @@ object Combinators {
                 is MutableFailure -> r
             }
         }
+
+        // TODO (toString): Append [pred] in readable way
+        override fun toString(): String = "$p.filter(...)"
     }
 
     data class Capturing(val p: Parser<*>) : Parser<String>() {
@@ -43,6 +50,8 @@ object Combinators {
                 is MutableFailure -> r
             }
         }
+
+        override fun toString(): String = p.toString()
     }
 
     data class Seq<out A, out B>(val a: Parser<A>, val b: Parser<B>) : Parser<Pair<A, B>>() {
@@ -60,6 +69,8 @@ object Combinators {
                 is MutableFailure -> fail(ctx, index)
             }
         }
+
+        override fun toString(): String = "$a * $b"
     }
 
     data class Either<out A>(val ps: List<Parser<A>>) : Parser<A>() {
@@ -75,6 +86,8 @@ object Combinators {
             }
             return loop(0)
         }
+
+        override fun toString(): String = ps.joinToString(" + ")
     }
 
     /**
@@ -89,13 +102,17 @@ object Combinators {
                 is MutableFailure -> succeed(ctx, Unit, index)
             }
         }
+
+        override fun toString(): String = "$p.not()"
     }
 
-    data class Rule<A>(val p: () -> Parser<A>) : Parser<A>() {
+    data class Rule<A>(val name: String, val p: () -> Parser<A>) : Parser<A>() {
         val pCache: Parser<A> by lazy(p)
 
         override fun parseRec(ctx: ParserCtx, index: Int): MutableParseResult =
             pCache.parseRec(ctx, index)
+
+        override fun toString(): String = name
     }
 
     data class Logged<A>(val p: Parser<A>, val name: String, val output: (String) -> Unit) : Parser<A>() {
@@ -112,6 +129,8 @@ object Combinators {
             }
             return r
         }
+
+        override fun toString(): String = p.toString()
     }
 
     data class Optional<out A>(val p: Parser<A>) : Parser<A?>() {
@@ -122,6 +141,8 @@ object Combinators {
                 is MutableFailure -> succeed(ctx, null, index)
             }
         }
+
+        override fun toString(): String = "$p.opt()"
     }
 
     data class Repeat<out A>(
@@ -160,6 +181,11 @@ object Combinators {
                 }
             }
             return loop(Terminals.Pass, 0)
+        }
+
+        override fun toString(): String {
+            // TODO (toString): Append non-default parameters
+            return "$p.rep()"
         }
     }
 }

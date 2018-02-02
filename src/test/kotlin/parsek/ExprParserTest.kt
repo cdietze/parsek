@@ -10,7 +10,7 @@ import kotlin.test.assertEquals
 class ExprParserTest {
     val int: Parser<Int> = (CharIn("+-").opt() * WhileCharIn("0123456789")).capture().map { it.toInt() }
 
-    val parens: Parser<Int> = P { P("(") * addSub * P(")") }
+    val parens: Parser<Int> = Rule("parens") { P("(") * addSub * P(")") }
     val factor: Parser<Int> = int + parens
 
     val divMul: Parser<Int> = (factor * ((P("*") + P("/")).capture() * factor).rep()).map(::eval)
