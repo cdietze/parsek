@@ -38,7 +38,7 @@ fun <T> Parser<T>.filter(pred: (T) -> Boolean): Parser<T> = Combinators.Filtered
 
 fun P(c: Char): Parser<Unit> = Terminals.CharParser(c)
 fun P(s: String): Parser<Unit> = Terminals.StringParser(s)
-fun <A> P(p: () -> Parser<A>): Parser<A> = Combinators.Rule(p)
+fun <A> Rule(name: String, p: () -> Parser<A>): Parser<A> = Combinators.Rule(name, p)
 
 val Start: Parser<Unit> = Terminals.Start
 val End: Parser<Unit> = Terminals.End
@@ -65,7 +65,7 @@ operator fun <A, B> Parser<A>.times(b: Parser<B>): Parser<Pair<A, B>> = Combinat
 
 operator fun <A> Parser<A>.plus(b: Parser<A>): Parser<A> = Combinators.Either(listOf(this, b))
 
-operator fun <A> Parser<A>.not(): Parser<Unit> = Combinators.Not(this)
+fun <A> Parser<A>.not(): Parser<Unit> = Combinators.Not(this)
 
 fun <A> Parser<A>.log(name: String, output: (String) -> Unit): Parser<A> = Combinators.Logged(this, name, output)
 

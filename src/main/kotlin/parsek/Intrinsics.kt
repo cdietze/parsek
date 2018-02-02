@@ -10,6 +10,9 @@ object Intrinsics {
                 fail(ctx, index)
             }
         }
+
+        // TODO (toString): Append [chars] in readable way
+        override fun toString(): String = "CharIn(...)"
     }
 
     data class CharPred(val pred: (Char) -> Boolean) : Parser<Unit>() {
@@ -20,6 +23,9 @@ object Intrinsics {
                 fail(ctx, index)
             }
         }
+
+        // TODO (toString): Append [pred] in readable way
+        override fun toString(): String = "CharPred(...)"
     }
 
     // TODO optimize using a BitSet
@@ -34,6 +40,12 @@ object Intrinsics {
             } else {
                 fail(ctx, index)
             }
+        }
+
+        override fun toString(): String {
+            // TODO (toString): Append [chars] in readable way
+            // TODO (toString): Append non-default parameters
+            return "WhileCharIn(...)"
         }
     }
 }

@@ -34,7 +34,7 @@ class JsonParserTest {
 
     companion object {
         val jsonExpr: Parser<Js.Val> =
-            P { space * (obj + array + string + `true` + `false` + `null` + `number`) * space }
+            Rule("jsonExpr") { space * (obj + array + string + `true` + `false` + `null` + `number`) * space }
 
         val space = WhileCharIn(" \r\n", min = 0)
         val digits = WhileCharIn("0123456789")
