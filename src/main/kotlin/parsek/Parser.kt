@@ -1,5 +1,25 @@
 package parsek
 
+/**
+ * Extension interface of [Parser] with some utility functions that
+ * should not be part of the public API.
+ */
+interface ParserImpl<out T> : Parser<T> {
+    fun <A> succeed(ctx: ParserCtx, value: A, index: Int): MutableParseResult.MutableSuccess {
+        return ctx.success.apply {
+            this.value = value
+            this.index = index
+        }
+    }
+
+    fun fail(ctx: ParserCtx, index: Int): MutableParseResult.MutableFailure {
+        return ctx.failure.apply {
+            this.index = index
+            this.lastParser = this@ParserImpl
+        }
+    }
+}
+
 sealed class ParseResult<out T> {
     abstract val index: Int
 

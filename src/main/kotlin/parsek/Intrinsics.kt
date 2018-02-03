@@ -2,7 +2,7 @@ package parsek
 
 object Intrinsics {
     // TODO optimize using a BitSet
-    data class CharIn(val chars: Iterable<Char>) : Parser<Unit>() {
+    data class CharIn(val chars: Iterable<Char>) : ParserImpl<Unit> {
         override fun parseRec(ctx: ParserCtx, index: Int): MutableParseResult {
             return if (index < ctx.input.length && ctx.input[index] in chars) {
                 succeed(ctx, Unit, index + 1)
@@ -15,7 +15,7 @@ object Intrinsics {
         override fun toString(): String = "CharIn(...)"
     }
 
-    data class CharPred(val pred: (Char) -> Boolean) : Parser<Unit>() {
+    data class CharPred(val pred: (Char) -> Boolean) : ParserImpl<Unit> {
         override fun parseRec(ctx: ParserCtx, index: Int): MutableParseResult {
             return if (index < ctx.input.length && pred(ctx.input[index])) {
                 succeed(ctx, Unit, index + 1)
@@ -29,7 +29,7 @@ object Intrinsics {
     }
 
     // TODO optimize using a BitSet
-    data class WhileCharIn(val chars: Iterable<Char>, val min: Int) : Parser<Unit>() {
+    data class WhileCharIn(val chars: Iterable<Char>, val min: Int) : ParserImpl<Unit> {
         override fun parseRec(ctx: ParserCtx, index: Int): MutableParseResult {
             var curIndex = index
             while (curIndex < ctx.input.length && ctx.input[curIndex] in chars) {

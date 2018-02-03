@@ -2,7 +2,7 @@ package parsek
 
 import kotlin.jvm.JvmName
 
-abstract class Parser<out T> {
+interface Parser<out T> {
     /**
      * Parses the given [input] starting at [index].
      * Returns the parsed result.
@@ -15,21 +15,11 @@ abstract class Parser<out T> {
      * It uses a mutable [ParserCtx] that is passed to recursive [parseRec] calls. Thus avoids
      * object allocations (e.g. for [ParseResult.Success] and [ParseResult.Failure] instances.
      */
-    abstract fun parseRec(ctx: ParserCtx, index: Int): MutableParseResult
+    fun parseRec(ctx: ParserCtx, index: Int): MutableParseResult
+}
 
-    protected fun <A> succeed(ctx: ParserCtx, value: A, index: Int): MutableParseResult.MutableSuccess {
-        return ctx.success.apply {
-            this.value = value
-            this.index = index
-        }
-    }
-
-    protected fun fail(ctx: ParserCtx, index: Int): MutableParseResult.MutableFailure {
-        return ctx.failure.apply {
-            this.index = index
-            this.lastParser = this@Parser
-        }
-    }
+interface NamedParser<out T> : Parser<T> {
+    val name: String
 }
 
 fun <T, R> Parser<T>.map(f: (T) -> R) = Combinators.Mapped(this, f)
@@ -38,7 +28,7 @@ fun <T> Parser<T>.filter(pred: (T) -> Boolean): Parser<T> = Combinators.Filtered
 
 fun P(c: Char): Parser<Unit> = Terminals.CharParser(c)
 fun P(s: String): Parser<Unit> = Terminals.StringParser(s)
-fun <A> Rule(name: String, p: () -> Parser<A>): Parser<A> = Combinators.Rule(name, p)
+fun <A> Rule(name: String, p: () -> Parser<A>): NamedParser<A> = Combinators.Rule(name, p)
 
 val Start: Parser<Unit> = Terminals.Start
 val End: Parser<Unit> = Terminals.End
@@ -67,7 +57,11 @@ operator fun <A> Parser<A>.plus(b: Parser<A>): Parser<A> = Combinators.Either(li
 
 fun <A> Parser<A>.not(): Parser<Unit> = Combinators.Not(this)
 
-fun <A> Parser<A>.log(name: String, output: (String) -> Unit): Parser<A> = Combinators.Logged(this, name, output)
+fun <A> NamedParser<A>.log(output: (String) -> Unit = ::println): Parser<A> =
+    Combinators.Logged(this, name, output)
+
+fun <A> Parser<A>.log(name: String, output: (String) -> Unit = ::println): Parser<A> =
+    Combinators.Logged(this, name, output)
 
 @JvmName("\$repU")
 fun Parser<Unit>.rep(min: Int = 0, max: Int = Int.MAX_VALUE, sep: Parser<*> = Terminals.Pass): Parser<Unit> =
