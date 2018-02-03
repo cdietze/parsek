@@ -5,7 +5,7 @@ import parsek.MutableParseResult.MutableSuccess
 
 object Combinators {
 
-    data class Mapped<A, out B>(val p: Parser<A>, val f: (A) -> B) : Parser<B>() {
+    data class Mapped<A, out B>(val p: Parser<A>, val f: (A) -> B) : ParserImpl<B> {
         override fun parseRec(ctx: ParserCtx, index: Int): MutableParseResult {
             val r = p.parseRec(ctx, index)
             return when (r) {
@@ -17,7 +17,7 @@ object Combinators {
         override fun toString(): String = p.toString()
     }
 
-    data class FlatMapped<A, out B>(val p: Parser<A>, val f: (A) -> Parser<B>) : Parser<B>() {
+    data class FlatMapped<A, out B>(val p: Parser<A>, val f: (A) -> Parser<B>) : ParserImpl<B> {
         override fun parseRec(ctx: ParserCtx, index: Int): MutableParseResult {
             val r = p.parseRec(ctx, index)
             return when (r) {
@@ -29,7 +29,7 @@ object Combinators {
         override fun toString(): String = p.toString()
     }
 
-    data class Filtered<A>(val p: Parser<A>, val pred: (A) -> Boolean) : Parser<A>() {
+    data class Filtered<A>(val p: Parser<A>, val pred: (A) -> Boolean) : ParserImpl<A> {
         override fun parseRec(ctx: ParserCtx, index: Int): MutableParseResult {
             val r = p.parseRec(ctx, index)
             return when (r) {
@@ -42,7 +42,7 @@ object Combinators {
         override fun toString(): String = "$p.filter(...)"
     }
 
-    data class Capturing(val p: Parser<*>) : Parser<String>() {
+    data class Capturing(val p: Parser<*>) : ParserImpl<String> {
         override fun parseRec(ctx: ParserCtx, index: Int): MutableParseResult {
             val r = p.parseRec(ctx, index)
             return when (r) {
@@ -54,7 +54,7 @@ object Combinators {
         override fun toString(): String = p.toString()
     }
 
-    data class Seq<out A, out B>(val a: Parser<A>, val b: Parser<B>) : Parser<Pair<A, B>>() {
+    data class Seq<out A, out B>(val a: Parser<A>, val b: Parser<B>) : ParserImpl<Pair<A, B>> {
         override fun parseRec(ctx: ParserCtx, index: Int): MutableParseResult {
             val ra = a.parseRec(ctx, index)
             return when (ra) {
@@ -75,7 +75,7 @@ object Combinators {
         override fun toString(): String = "$a * $b"
     }
 
-    data class Either<out A>(val ps: List<Parser<A>>) : Parser<A>() {
+    data class Either<out A>(val ps: List<Parser<A>>) : ParserImpl<A> {
         override fun parseRec(ctx: ParserCtx, index: Int): MutableParseResult {
             tailrec fun loop(parserIndex: Int): MutableParseResult {
                 if (parserIndex >= ps.size) return fail(ctx, index)
@@ -96,7 +96,7 @@ object Combinators {
      * Wraps another parser and succeeds if it fails and fails if it succeeds.
      * Does not consume any input in either case.
      */
-    data class Not(val p: Parser<*>) : Parser<Unit>() {
+    data class Not(val p: Parser<*>) : ParserImpl<Unit> {
         override fun parseRec(ctx: ParserCtx, index: Int): MutableParseResult {
             val r = p.parseRec(ctx, index)
             return when (r) {
@@ -108,7 +108,7 @@ object Combinators {
         override fun toString(): String = "$p.not()"
     }
 
-    data class Rule<A>(val name: String, val p: () -> Parser<A>) : Parser<A>() {
+    data class Rule<A>(override val name: String, val p: () -> Parser<A>) : NamedParser<A> {
         val pCache: Parser<A> by lazy(p)
 
         override fun parseRec(ctx: ParserCtx, index: Int): MutableParseResult =
@@ -117,7 +117,7 @@ object Combinators {
         override fun toString(): String = name
     }
 
-    data class Logged<A>(val p: Parser<A>, val name: String, val output: (String) -> Unit) : Parser<A>() {
+    data class Logged<A>(val p: Parser<A>, val name: String, val output: (String) -> Unit) : Parser<A> {
         override fun parseRec(ctx: ParserCtx, index: Int): MutableParseResult {
             output("+$name:$index")
             val r = p.parseRec(ctx, index)
@@ -135,7 +135,7 @@ object Combinators {
         override fun toString(): String = p.toString()
     }
 
-    data class Optional<out A>(val p: Parser<A>) : Parser<A?>() {
+    data class Optional<out A>(val p: Parser<A>) : ParserImpl<A?> {
         override fun parseRec(ctx: ParserCtx, index: Int): MutableParseResult {
             val r = p.parseRec(ctx, index)
             return when (r) {
@@ -152,7 +152,7 @@ object Combinators {
         val min: Int,
         val max: Int,
         val separator: Parser<*>
-    ) : Parser<List<A>>() {
+    ) : ParserImpl<List<A>> {
         override fun parseRec(ctx: ParserCtx, index: Int): MutableParseResult {
             val result = mutableListOf<A>()
             var lastIndex = index
