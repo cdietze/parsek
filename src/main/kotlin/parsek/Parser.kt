@@ -60,7 +60,13 @@ fun <T> ParseResult<T>.getOrFail(): ParseResult.Success<T> = when (this) {
  * Contains constants that are valid during the whole parse (e.g., [input])
  * and mutable instances that may be reused to avoid object allocations.
  */
-data class ParserCtx(val input: String) {
+data class ParserCtx(
+    /** The input string that is processed during this parse.
+     * This does not change throughout this parse. */
+    val input: String,
+    /** The current log depth. Whenever a [Combinators.Logged] is parsed this is incremented by 1. */
+    var logDepth: Int = 0
+) {
     val success = MutableParseResult.MutableSuccess()
     val failure = MutableParseResult.MutableFailure(input)
 }
