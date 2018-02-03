@@ -119,14 +119,18 @@ object Combinators {
 
     data class Logged<A>(val p: Parser<A>, val name: String, val output: (String) -> Unit) : Parser<A> {
         override fun parseRec(ctx: ParserCtx, index: Int): MutableParseResult {
-            output("+$name:$index")
+            val thisLogDepth = ctx.logDepth
+            ctx.logDepth += 1
+            val indent = "  ".repeat(thisLogDepth)
+            output("$indent+$name:$index")
             val r = p.parseRec(ctx, index)
+            ctx.logDepth = thisLogDepth
             when (r) {
                 is MutableSuccess -> output(
-                    "-$name:$index Success(:${r.index},'${ctx.input.substring(index, r.index)}')"
+                    "$indent-$name:$index Success(:${r.index},'${ctx.input.substring(index, r.index)}')"
                 )
                 is MutableFailure -> output(
-                    "-$name:$index Failure"
+                    "$indent-$name:$index Failure"
                 )
             }
             return r
