@@ -2,7 +2,7 @@ package parsek
 
 import kotlin.jvm.JvmName
 
-interface Parser<out T> {
+abstract class Parser<out T> {
     /**
      * Parses the given [input] starting at [index].
      * Returns the parsed result.
@@ -15,11 +15,11 @@ interface Parser<out T> {
      * It uses a mutable [ParserCtx] that is passed to recursive [parseRec] calls. Thus avoids
      * object allocations (e.g. for [ParseResult.Success] and [ParseResult.Failure] instances.
      */
-    fun parseRec(ctx: ParserCtx, index: Int): MutableParseResult
+    abstract fun parseRec(ctx: ParserCtx, index: Int): MutableParseResult
 }
 
-interface NamedParser<out T> : Parser<T> {
-    val name: String
+abstract class NamedParser<out T> : Parser<T>() {
+    abstract val name: String
 }
 
 fun <T, R> Parser<T>.map(f: (T) -> R) = Combinators.Mapped(this, f)
