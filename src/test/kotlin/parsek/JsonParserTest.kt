@@ -51,7 +51,7 @@ class JsonParserTest {
         val `false` = P("false").map { Js.Val.False }
 
         val array: Parser<Arr> = Rule("array") {
-            (P("[") * jsonExpr.rep(sep = P(",")) * space * P("]")).map { Arr(it) }
+            (P("[").cut() * jsonExpr.rep(sep = P(",").cut()) * space * P("]")).map { Arr(it) }
         }
 
         val hexDigit = CharIn(('0'..'9') + ('a'..'f') + ('A'..'F'))
@@ -62,12 +62,13 @@ class JsonParserTest {
         val strChars = CharPred(strCharPred).rep(min = 1)
 
         val string: Parser<Str> = Rule("string") {
-            (space * P("\"") * (strChars + escape).rep().capture() * P("\"")).map { Str(it) }
+            (space * P("\"").cut() * (strChars + escape).rep().capture() * P("\"")).map { Str(it) }
         }
 
-        val pair: Parser<Pair<String, Js.Val>> = Rule("pair") { string.map { it.value } * P(":") * jsonExpr }
+        val pair: Parser<Pair<String, Js.Val>> =
+            Rule("pair") { string.cut().map { it.value } * P(":").cut() * jsonExpr }
         val obj: Parser<Obj> = Rule("obj") {
-            (P("{") * pair.rep(sep = P(",")) * space * P("}")).map { Obj(it) }
+            (P("{").cut() * pair.rep(sep = P(",").cut()) * space * P("}")).map { Obj(it) }
         }
     }
 
