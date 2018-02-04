@@ -72,3 +72,5 @@ fun <A> Parser<A>.rep(min: Int = 0, max: Int = Int.MAX_VALUE, sep: Parser<*> = T
     Combinators.Repeat(this, min, max, sep)
 
 fun <A> Parser<A>.opt(): Parser<A?> = Combinators.Optional(this)
+
+fun <A> Parser<A>.cut(): Parser<A> = Combinators.Cut(this)

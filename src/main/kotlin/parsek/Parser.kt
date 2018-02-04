@@ -5,17 +5,19 @@ package parsek
  * should not be part of the public API.
  */
 interface ParserImpl<out T> : Parser<T> {
-    fun <A> succeed(ctx: ParserCtx, value: A, index: Int): MutableParseResult.MutableSuccess {
+    fun <A> succeed(ctx: ParserCtx, value: A, index: Int, cut: Boolean = false): MutableParseResult.MutableSuccess {
         return ctx.success.apply {
             this.value = value
             this.index = index
+            this.cut = cut
         }
     }
 
-    fun fail(ctx: ParserCtx, index: Int): MutableParseResult.MutableFailure {
+    fun fail(ctx: ParserCtx, index: Int, cut: Boolean = false): MutableParseResult.MutableFailure {
         return ctx.failure.apply {
             this.index = index
             this.lastParser = this@ParserImpl
+            this.cut = cut
         }
     }
 }
@@ -80,7 +82,8 @@ sealed class MutableParseResult {
 
     data class MutableSuccess(
         var value: Any? = null,
-        var index: Int = 0
+        var index: Int = 0,
+        var cut: Boolean = false
     ) : MutableParseResult() {
         override fun <A> toResult(): ParseResult.Success<A> =
             ParseResult.Success(value as A, index)
@@ -89,6 +92,7 @@ sealed class MutableParseResult {
     data class MutableFailure(
         val input: String,
         var index: Int = 0,
+        var cut: Boolean = false,
         var lastParser: Parser<*>? = null
     ) : MutableParseResult() {
         override fun <A> toResult(): ParseResult.Failure =

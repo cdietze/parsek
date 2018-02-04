@@ -107,3 +107,61 @@ class NotTests {
         assertTrue(p.parse("b").let { it.isSuccess && it.index == 0 })
     }
 }
+
+class CutTests {
+
+    @Test
+    fun `should set cut flag on successful parse`() {
+        assertTrue(
+            P("a").cut().parseRec(ParserCtx("a"), 0).let {
+                it is MutableParseResult.MutableSuccess && it.cut
+            })
+    }
+
+    @Test
+    fun `should not set cut flag on failed parse`() {
+        assertTrue(
+            P("a").cut().parseRec(ParserCtx("b"), 0).let {
+                it is MutableParseResult.MutableFailure && !it.cut
+            })
+    }
+
+    @Test
+    fun `should keep cut flag in successful sequences`() {
+        assertTrue(
+            (P("(").cut() * P("a")).parseRec(ParserCtx("(a"), 0).let {
+                it is MutableParseResult.MutableSuccess && it.cut
+            })
+    }
+
+    @Test
+    fun `should keep cut flag in failed sequences`() {
+        assertTrue(
+            (P("(").cut() * P("a")).parseRec(ParserCtx("(b"), 0).let {
+                it is MutableParseResult.MutableFailure && it.cut
+            })
+    }
+
+    @Test
+    fun `should not try alternative when cut`() {
+        val p = P("(").cut() * P("a") + P("(b")
+        assertTrue(p.parse("(a").isSuccess)
+        assertTrue(p.parse("(b").isFailure)
+    }
+
+    @Test
+    fun `should not try alternative when repeat is cut`() {
+        val p = P("(").rep().cut() * P("a") + P("(b") + P("b")
+        assertTrue(p.parse("(a").isSuccess)
+        assertTrue(p.parse("(b").isFailure)
+        assertTrue(p.parse("b").isFailure)
+    }
+
+    @Test
+    fun `should not try alternative when cut is repeated`() {
+        val p = P("(").cut().rep() * P("a") + P("(b") + P("b")
+        assertTrue(p.parse("(a").isSuccess)
+        assertTrue(p.parse("(b").isFailure)
+        assertTrue(p.parse("b").isSuccess)
+    }
+}

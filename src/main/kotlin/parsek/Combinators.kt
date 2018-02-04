@@ -9,7 +9,7 @@ object Combinators {
         override fun parseRec(ctx: ParserCtx, index: Int): MutableParseResult {
             val r = p.parseRec(ctx, index)
             return when (r) {
-                is MutableSuccess -> succeed(ctx, f(r.value as A), r.index)
+                is MutableSuccess -> r.apply { value = f(r.value as A) }
                 is MutableFailure -> r
             }
         }
@@ -59,14 +59,19 @@ object Combinators {
             val ra = a.parseRec(ctx, index)
             return when (ra) {
                 is MutableSuccess -> {
+                    val raIndex = ra.index
                     val raValue = ra.value
-                    val rb = b.parseRec(ctx, ra.index)
+                    val raCut = ra.cut
+                    // Shadow current results var before we call parseRec which may override its mutable content
+                    @Suppress("NAME_SHADOWING", "UNUSED_VARIABLE")
+                    val ra = null
+                    val rb = b.parseRec(ctx, raIndex)
                     return when (rb) {
-                        is MutableSuccess -> succeed(ctx, Pair(raValue, rb.value), rb.index)
-                        is MutableFailure -> rb
+                        is MutableSuccess -> succeed(ctx, Pair(raValue, rb.value), rb.index, cut = raCut || rb.cut)
+                        is MutableFailure -> rb.apply { cut = raCut }
                     }
                 }
-                is MutableFailure -> fail(ctx, index)
+                is MutableFailure -> fail(ctx, index, cut = ra.cut)
             }
         }
 
@@ -83,7 +88,9 @@ object Combinators {
                 val r = parser.parseRec(ctx, index)
                 return when (r) {
                     is MutableSuccess -> r
-                    is MutableFailure -> loop(parserIndex + 1)
+                    is MutableFailure -> if (r.cut)
+                        fail(ctx, index, cut = true) else
+                        loop(parserIndex + 1)
                 }
             }
             return loop(0)
@@ -130,7 +137,7 @@ object Combinators {
                     "$indent-$name:$index Success(:${r.index},'${ctx.input.substring(index, r.index)}')"
                 )
                 is MutableFailure -> output(
-                    "$indent-$name:$index Failure"
+                    "$indent-$name:$index Failure(:${r.index})"
                 )
             }
             return r
@@ -160,38 +167,55 @@ object Combinators {
         override fun parseRec(ctx: ParserCtx, index: Int): MutableParseResult {
             val result = mutableListOf<A>()
             var lastIndex = index
-            tailrec fun loop(sep: Parser<*>, count: Int): MutableParseResult {
+            tailrec fun loop(sep: Parser<*>, count: Int, cut: Boolean): MutableParseResult {
                 if (count >= max) {
                     return succeed(ctx, result, lastIndex)
                 }
                 val sepResult = sep.parseRec(ctx, lastIndex)
                 return when (sepResult) {
                     is MutableSuccess -> {
-                        val parseResult = p.parseRec(ctx, sepResult.index)
+                        val sepResultIndex = sepResult.index
+                        val sepResultCut = sepResult.cut
+                        // Shadow current results var before we call parseRec which may override its mutable content
+                        @Suppress("NAME_SHADOWING", "UNUSED_VARIABLE")
+                        val sepResult = null
+                        val parseResult = p.parseRec(ctx, sepResultIndex)
                         when (parseResult) {
                             is MutableSuccess -> {
                                 result.add(parseResult.value as A)
                                 lastIndex = parseResult.index
-                                loop(separator, count + 1)
+                                loop(separator, count + 1, cut || sepResultCut || parseResult.cut)
                             }
                             is MutableFailure -> {
-                                if (min <= count) succeed(ctx, result, lastIndex)
-                                else fail(ctx, index)
+                                if (min <= count) succeed(ctx, result, lastIndex, cut)
+                                else fail(ctx, index, cut)
                             }
                         }
                     }
                     is MutableFailure -> {
-                        if (min <= count) succeed(ctx, result, lastIndex)
-                        else fail(ctx, index)
+                        if (min <= count) succeed(ctx, result, lastIndex, cut = cut)
+                        else fail(ctx, index, cut = cut)
                     }
                 }
             }
-            return loop(Terminals.Pass, 0)
+            return loop(sep = Terminals.Pass, count = 0, cut = false)
         }
 
         override fun toString(): String {
             // TODO (toString): Append non-default parameters
             return "$p.rep()"
         }
+    }
+
+    data class Cut<out A>(val p: Parser<A>) : ParserImpl<A> {
+        override fun parseRec(ctx: ParserCtx, index: Int): MutableParseResult {
+            val r = p.parseRec(ctx, index)
+            return when (r) {
+                is MutableSuccess -> r.apply { cut = true }
+                is MutableFailure -> r
+            }
+        }
+
+        override fun toString(): String = "$p.cut()"
     }
 }
