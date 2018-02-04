@@ -4,7 +4,8 @@ package parsek
  * Extension interface of [Parser] with some utility functions that
  * should not be part of the public API.
  */
-interface ParserImpl<out T> : Parser<T> {
+abstract class ParserImpl<out T> : Parser<T>() {
+
     fun <A> succeed(ctx: ParserCtx, value: A, index: Int, cut: Boolean = false): MutableParseResult.MutableSuccess {
         return ctx.success.apply {
             this.value = value
