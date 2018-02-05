@@ -7,7 +7,7 @@ import kotlin.test.assertTrue
 class BasicTest {
 
     @Test
-    fun `should succeed simple samples`() {
+    fun `shouldSucceedSimpleSamples`() {
         val p = P("a")
         assertEquals(ParseResult.Success(Unit, 1), p.parse("a"))
         assertEquals(ParseResult.Success(Unit, 1), p.parse("ab"))
@@ -15,7 +15,7 @@ class BasicTest {
     }
 
     @Test
-    fun `should fail simple samples`() {
+    fun `shouldFailSimpleSamples`() {
         val p = P("a")
         assertTrue(p.parse("").isFailure)
         assertTrue(p.parse("b").isFailure)
@@ -23,7 +23,7 @@ class BasicTest {
     }
 
     @Test
-    fun `should handle Start correctly`() {
+    fun `shouldHandleStartCorrectly`() {
         assertTrue(Start.parse("").isSuccess)
         assertTrue(Start.parse("a").isSuccess)
         assertTrue(Start.parse("a", 1).isFailure)
@@ -31,7 +31,7 @@ class BasicTest {
     }
 
     @Test
-    fun `should handle End correctly`() {
+    fun `shouldHandleEndCorrectly`() {
         assertTrue(End.parse("").isSuccess)
         assertTrue(End.parse("a").isFailure)
 

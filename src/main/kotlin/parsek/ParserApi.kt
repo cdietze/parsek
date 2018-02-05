@@ -1,7 +1,5 @@
 package parsek
 
-import kotlin.jvm.JvmName
-
 abstract class Parser<out T> {
     /**
      * Parses the given [input] starting at [index].

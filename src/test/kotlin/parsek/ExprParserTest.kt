@@ -31,7 +31,7 @@ class ExprParserTest {
     }
 
     @Test
-    fun `should parse int expressions`() {
+    fun `shouldParseIntExpressions`() {
         assertEquals(ParseResult.Success(1, 1), int.parse("1"))
         assertEquals(ParseResult.Success(42, 2), int.parse("42"))
         assertEquals(ParseResult.Success(42, 3), int.parse("+42"))
@@ -39,7 +39,7 @@ class ExprParserTest {
     }
 
     @Test
-    fun `should eval simple math expressions`() {
+    fun `shouldEvalSimpleMathExpressions`() {
         assertEquals(ParseResult.Success(123, 3), expr.parse("123"))
         assertEquals(ParseResult.Success(2, 3), expr.parse("1+1"))
         assertEquals(ParseResult.Success(2, 3), expr.parse("3-1"))
@@ -49,7 +49,7 @@ class ExprParserTest {
     }
 
     @Test
-    fun `should eval nested math expressions`() {
+    fun `shouldEvalNestedMathExpressions`() {
         assertEquals(7, expr.parse("1+2*3").getOrFail().value)
         assertEquals(7, expr.parse("2*3+1").getOrFail().value)
         assertEquals(9, expr.parse("(1+2)*3").getOrFail().value)

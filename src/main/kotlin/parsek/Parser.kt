@@ -1,5 +1,7 @@
 package parsek
 
+expect annotation class JvmName(val name: String)
+
 /**
  * Extension interface of [Parser] with some utility functions that
  * should not be part of the public API.

@@ -6,7 +6,7 @@ import kotlin.test.assertTrue
 
 class FilterCombinator {
     @Test
-    fun `should work`() {
+    fun `shouldWork`() {
         val p = CharIn("ab").capture().filter { it == "a" }
         assertTrue(p.parse("a").isSuccess)
         assertTrue(p.parse("b").isFailure)
@@ -16,13 +16,13 @@ class FilterCombinator {
 
 class SequenceCombinator {
     @Test
-    fun `should succeed simple samples`() {
+    fun `shouldSucceedSimpleSamples`() {
         val p = P("a") * P("b")
         assertEquals(ParseResult.Success(Unit, 2), p.parse("ab"))
     }
 
     @Test
-    fun `should fail simple samples`() {
+    fun `shouldFailSimpleSamples`() {
         val p = P("a") * P("b")
         assertTrue(p.parse("").isFailure)
         assertTrue(p.parse("a").isFailure)
@@ -32,7 +32,7 @@ class SequenceCombinator {
     }
 
     @Test
-    fun `should contain correct value`() {
+    fun `shouldContainCorrectValue`() {
         val p = P("a").capture() * P("b").capture()
         assertEquals(ParseResult.Success(Pair("a", "b"), 2), p.parse("ab"))
     }
@@ -40,7 +40,7 @@ class SequenceCombinator {
 
 class EitherCombinator {
     @Test
-    fun `should succeed simple samples`() {
+    fun `shouldSucceedSimpleSamples`() {
         val p = (P("a") + P("b")).capture()
         assertEquals(ParseResult.Success("a", 1), p.parse("a"))
         assertEquals(ParseResult.Success("b", 1), p.parse("b"))
@@ -49,7 +49,7 @@ class EitherCombinator {
     }
 
     @Test
-    fun `should fail simple samples`() {
+    fun `shouldFailSimpleSamples`() {
         val p = P("a") + P("b")
         assertTrue(p.parse("").isFailure)
         assertTrue(p.parse("c").isFailure)
@@ -59,7 +59,7 @@ class EitherCombinator {
 
 class RepeatTests {
     @Test
-    fun `should succeed simple samples`() {
+    fun `shouldSucceedSimpleSamples`() {
         val p: Parser<Unit> = P("a").rep()
         assertEquals(ParseResult.Success(Unit, 0), p.parse(""))
         assertEquals(ParseResult.Success(Unit, 1), p.parse("a"))
@@ -69,7 +69,7 @@ class RepeatTests {
     }
 
     @Test
-    fun `should honor min`() {
+    fun `shouldHonorMin`() {
         val p: Parser<Unit> = P("a").rep(min = 2)
         assertTrue(p.parse("").isFailure)
         assertTrue(p.parse("a").isFailure)
@@ -78,7 +78,7 @@ class RepeatTests {
     }
 
     @Test
-    fun `should honor max`() {
+    fun `shouldHonorMax`() {
         val p: Parser<Unit> = P("a").rep(max = 2)
         assertEquals(ParseResult.Success(Unit, 0), p.parse(""))
         assertEquals(ParseResult.Success(Unit, 1), p.parse("a"))
@@ -88,7 +88,7 @@ class RepeatTests {
     }
 
     @Test
-    fun `should honor separator`() {
+    fun `shouldHonorSeparator`() {
         val p: Parser<Unit> = P("a").rep(sep = P(","))
         assertEquals(ParseResult.Success(Unit, 0), p.parse(""))
         assertEquals(ParseResult.Success(Unit, 1), p.parse("a"))
@@ -100,7 +100,7 @@ class RepeatTests {
 
 class NotTests {
     @Test
-    fun `should work`() {
+    fun `shouldWork`() {
         val p: Parser<Unit> = P("a").not()
         assertTrue(p.parse("").let { it.isSuccess && it.index == 0 })
         assertTrue(p.parse("a").let { it.isFailure && it.index == 0 })
@@ -111,7 +111,7 @@ class NotTests {
 class CutTests {
 
     @Test
-    fun `should set cut flag on successful parse`() {
+    fun `shouldSetCutFlagOnSuccessfulParse`() {
         assertTrue(
             P("a").cut().parseRec(ParserCtx("a"), 0).let {
                 it is MutableParseResult.MutableSuccess && it.cut
@@ -119,7 +119,7 @@ class CutTests {
     }
 
     @Test
-    fun `should not set cut flag on failed parse`() {
+    fun `shouldNotSetCutFlagOnFailedParse`() {
         assertTrue(
             P("a").cut().parseRec(ParserCtx("b"), 0).let {
                 it is MutableParseResult.MutableFailure && !it.cut
@@ -127,7 +127,7 @@ class CutTests {
     }
 
     @Test
-    fun `should keep cut flag in successful sequences`() {
+    fun `shouldKeepCutFlagInSuccessfulSequences`() {
         assertTrue(
             (P("(").cut() * P("a")).parseRec(ParserCtx("(a"), 0).let {
                 it is MutableParseResult.MutableSuccess && it.cut
@@ -135,7 +135,7 @@ class CutTests {
     }
 
     @Test
-    fun `should keep cut flag in failed sequences`() {
+    fun `shouldKeepCutFlagInFailedSequences`() {
         assertTrue(
             (P("(").cut() * P("a")).parseRec(ParserCtx("(b"), 0).let {
                 it is MutableParseResult.MutableFailure && it.cut
@@ -143,14 +143,14 @@ class CutTests {
     }
 
     @Test
-    fun `should not try alternative when cut`() {
+    fun `shouldNotTryAlternativeWhenCut`() {
         val p = P("(").cut() * P("a") + P("(b")
         assertTrue(p.parse("(a").isSuccess)
         assertTrue(p.parse("(b").isFailure)
     }
 
     @Test
-    fun `should not try alternative when repeat is cut`() {
+    fun `shouldNotTryAlternativeWhenRepeatIsCut`() {
         val p = P("(").rep().cut() * P("a") + P("(b") + P("b")
         assertTrue(p.parse("(a").isSuccess)
         assertTrue(p.parse("(b").isFailure)
@@ -158,7 +158,7 @@ class CutTests {
     }
 
     @Test
-    fun `should not try alternative when cut is repeated`() {
+    fun `shouldNotTryAlternativeWhenCutIsRepeated`() {
         val p = P("(").cut().rep() * P("a") + P("(b") + P("b")
         assertTrue(p.parse("(a").isSuccess)
         assertTrue(p.parse("(b").isFailure)
