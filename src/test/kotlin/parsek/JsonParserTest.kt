@@ -73,33 +73,33 @@ class JsonParserTest {
     }
 
     @Test
-    fun `should parse num`() {
+    fun `shouldParseNum`() {
         assertEquals(Num(0.0), number.parse("0").getOrFail().value)
         assertEquals(Num(1230.0), number.parse("1230").getOrFail().value)
     }
 
     @Test
-    fun `should parse string`() {
+    fun `shouldParseString`() {
         assertEquals(Str(""), string.parse("\"\"").getOrFail().value)
         assertEquals(Str("abc"), string.parse("\"abc\"").getOrFail().value)
     }
 
     @Test
-    fun `should parse escaped strings`() {
+    fun `shouldParseEscapedStrings`() {
         assertEquals(Str("a\\tb"), string.parse(""""a\tb"""").getOrFail().value)
         assertEquals(Str("a\\b\\f\\n\\r\\tb"), string.parse(""""a\b\f\n\r\tb"""").getOrFail().value)
         assertEquals(Str("a\\u2665b"), string.parse(""""a\u2665b"""").getOrFail().value)
     }
 
     @Test
-    fun `should fail on invalid escaped strings`() {
+    fun `shouldFailOnInvalidEscapedStrings`() {
         assertTrue(string.parse(""""\x"""").isFailure)
         assertTrue(string.parse(""""\uxxxx"""").isFailure)
         assertTrue(string.parse(""""\uab"""").isFailure)
     }
 
     @Test
-    fun `should parse flat expressions`() {
+    fun `shouldParseFlatExpressions`() {
         assertEquals(Obj(listOf()), jsonExpr.parse("{}").getOrFail().value)
         assertEquals(Obj(listOf("a" to Str("b"))), jsonExpr.parse("""{"a": "b"}""").getOrFail().value)
         assertEquals(
@@ -115,7 +115,7 @@ class JsonParserTest {
     }
 
     @Test
-    fun `should parse nested expressions`() {
+    fun `shouldParseNestedExpressions`() {
         assertEquals(Arr(listOf(Obj())), jsonExpr.parse("""[{}]""").getOrFail().value)
         assertEquals(Arr(listOf(Obj(), Obj())), jsonExpr.parse("""[{},{}]""").getOrFail().value)
         assertEquals(Obj(listOf("a" to Str("b"))), jsonExpr.parse("""{"a":"b"}""").getOrFail().value)
