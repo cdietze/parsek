@@ -1,4 +1,5 @@
 rootProject.name = 'parsek'
 include 'parsek-jvm'
 include 'parsek-js'
+include 'parsek-native'
 include 'demos:js-demo'

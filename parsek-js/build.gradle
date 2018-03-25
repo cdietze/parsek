@@ -1,23 +1,6 @@
-buildscript {
-    ext.kotlin_version = '1.2.20'
-
-    repositories {
-        // Needed for com.moowork.node plugin
-        maven { url "https://plugins.gradle.org/m2/" }
-        mavenCentral()
-    }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.moowork.gradle:gradle-node-plugin:1.2.0'
-    }
-}
-
 apply plugin: 'kotlin-platform-js'
 apply plugin: 'com.moowork.node'
 
-repositories {
-    mavenCentral()
-}
 
 dependencies {
     expectedBy project(":")
@@ -25,34 +8,45 @@ dependencies {
     testCompile "org.jetbrains.kotlin:kotlin-test-js:$kotlin_version"
 }
 
-[compileKotlin2Js, compileTestKotlin2Js]*.configure {
-    kotlinOptions.metaInfo = true
-    kotlinOptions.sourceMap = true
-    kotlinOptions.sourceMapEmbedSources = "always"
-    kotlinOptions.moduleKind = "umd"
+tasks.withType(compileKotlin2Js.getClass()) {
+    kotlinOptions {
+        moduleKind = "umd"
+        sourceMap = true
+        metaInfo = true
+    }
 }
 
 task populateNodeModules(type: Copy, dependsOn: compileKotlin2Js) {
     from compileKotlin2Js.destinationDir
-
-    configurations.testCompile.each {
-        from zipTree(it.absolutePath).matching { include '*.js' }
-    }
-
     into "${buildDir}/node_modules"
+
+    afterEvaluate {
+        configurations.testCompile.each {
+            from zipTree(it.absolutePath).matching {
+                include '*.js'
+                include '*.js.map'
+            }
+        }
+    }
 }
 
 node {
+    version = "$node_version"
+    npmVersion = "$npm_version"
     download = true
 }
 
-task installQunit(type: NpmTask) {
-    args = ['install', 'qunit']
+task installDependencies(type: NpmTask) {
+    args = ['install', 'mocha', 'source-map-support']
+    if (project.hasProperty("teamcity")) args += 'mocha-teamcity-reporter'
 }
 
-task runQunit(type: NodeTask, dependsOn: [compileTestKotlin2Js, populateNodeModules, installQunit]) {
-    script = file('node_modules/.bin/qunit')
-    args = [projectDir.toPath().relativize(file(compileTestKotlin2Js.outputFile).toPath())]
+task prepareMocha(dependsOn: [compileTestKotlin2Js, populateNodeModules, installDependencies])
+
+task runMocha(type: NodeTask, dependsOn: prepareMocha) {
+    script = file('node_modules/mocha/bin/mocha')
+    args = [compileTestKotlin2Js.outputFile, '--require=source-map-support/register']
+    if (project.hasProperty("teamcity")) args += '--reporter=mocha-teamcity-reporter'
 }
 
-test.dependsOn runQunit
+test.dependsOn runMocha

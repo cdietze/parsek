@@ -1,25 +1,37 @@
 buildscript {
-    ext.kotlin_version = '1.2.20'
-
     repositories {
-        mavenCentral()
+        jcenter()
+        maven { url "http://kotlin.bintray.com/kotlinx" }
+        maven { url "https://plugins.gradle.org/m2/" }
+        maven { url "https://dl.bintray.com/jetbrains/kotlin-native-dependencies" }
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "com.moowork.gradle:gradle-node-plugin:$gradle_node_version"
+        classpath "org.jetbrains.kotlin:kotlin-native-gradle-plugin:$kotlin_native_version"
     }
 }
 
-version '1.0-SNAPSHOT'
+allprojects {
+    version '1.0-SNAPSHOT'
+
+    repositories {
+        jcenter()
+        maven { url "http://kotlin.bintray.com/kotlinx" }
+    }
+
+    tasks.withType(Test) {
+        testLogging {
+            showStandardStreams = true
+            events "passed", "failed"
+        }
+    }
+}
 
 apply plugin: 'kotlin-platform-common'
-
-repositories {
-    mavenCentral()
-}
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlin_version"
     testCompile "org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlin_version"
     testCompile "org.jetbrains.kotlin:kotlin-test-common:$kotlin_version"
-    testCompile group: 'junit', name: 'junit', version: '4.12'
 }
