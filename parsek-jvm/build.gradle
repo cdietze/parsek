@@ -13,6 +13,7 @@ version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
 apply plugin: 'kotlin-platform-jvm'
+apply plugin: 'maven'
 
 sourceCompatibility = 1.8
 
