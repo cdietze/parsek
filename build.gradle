@@ -12,9 +12,14 @@ buildscript {
 version '1.0-SNAPSHOT'
 
 apply plugin: 'kotlin-platform-common'
+apply plugin: 'maven'
 
 repositories {
     mavenCentral()
+}
+
+allprojects {
+    group = 'com.github.cdietze'
 }
 
 dependencies {
