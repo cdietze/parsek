@@ -40,13 +40,16 @@ fun WhileCharIn(chars: String, min: Int = 1): Parser<Unit> = Intrinsics.WhileCha
 fun Parser<Any?>.capture(): Parser<String> = Combinators.Capturing(this)
 
 @JvmName("\$timesUU")
-operator fun Parser<Unit>.times(b: Parser<Unit>): Parser<Unit> = Combinators.Seq(this, b).map { Unit }
+operator fun Parser<Unit>.times(b: Parser<Unit>): Parser<Unit> =
+    Combinators.Seq(this, b).map<Pair<Unit, Unit>, Unit> { Unit }
 
 @JvmName("\$timesUA")
-operator fun <A> Parser<Unit>.times(b: Parser<A>): Parser<A> = Combinators.Seq(this, b).map { it.second }
+operator fun <A> Parser<Unit>.times(b: Parser<A>): Parser<A> =
+    Combinators.Seq(this, b).map<Pair<Unit, A>, A> { it.second }
 
 @JvmName("\$timesAU")
-operator fun <A> Parser<A>.times(b: Parser<Unit>): Parser<A> = Combinators.Seq(this, b).map { it.first }
+operator fun <A> Parser<A>.times(b: Parser<Unit>): Parser<A> =
+    Combinators.Seq(this, b).map<Pair<A, Unit>, A> { it.first }
 
 @JvmName("\$timesAB")
 operator fun <A, B> Parser<A>.times(b: Parser<B>): Parser<Pair<A, B>> = Combinators.Seq(this, b)
@@ -72,3 +75,23 @@ fun <A> Parser<A>.rep(min: Int = 0, max: Int = Int.MAX_VALUE, sep: Parser<*> = T
 fun <A> Parser<A>.opt(): Parser<A?> = Combinators.Optional(this)
 
 fun <A> Parser<A>.cut(): Parser<A> = Combinators.Cut(this)
+
+fun <A, B, R> Parser<Pair<A, B>>.map(f: (A, B) -> R): Parser<R> =
+    map { p -> f(p.first, p.second) }
+
+fun <A, B, C, R> Parser<Pair<Pair<A, B>, C>>.map(f: (A, B, C) -> R): Parser<R> =
+    map { p -> f(p.first.first, p.first.second, p.second) }
+
+fun <A, B, C, D, R> Parser<Pair<Pair<Pair<A, B>, C>, D>>.map(f: (A, B, C, D) -> R): Parser<R> =
+    map { p -> f(p.first.first.first, p.first.first.second, p.first.second, p.second) }
+
+fun <A, B, C, D, E, R> Parser<Pair<Pair<Pair<Pair<A, B>, C>, D>, E>>.map(f: (A, B, C, D, E) -> R): Parser<R> =
+    map { p ->
+        f(
+            p.first.first.first.first,
+            p.first.first.first.second,
+            p.first.first.second,
+            p.first.second,
+            p.second
+        )
+    }
