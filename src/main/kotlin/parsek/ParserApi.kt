@@ -31,9 +31,9 @@ fun <A> Rule(name: String, p: () -> Parser<A>): NamedParser<A> = Combinators.Rul
 val Start: Parser<Unit> = Terminals.Start
 val End: Parser<Unit> = Terminals.End
 
-fun CharIn(chars: Iterable<Char>): Parser<Unit> = Intrinsics.CharIn(chars)
-fun CharIn(chars: String): Parser<Unit> = Intrinsics.CharIn(chars.asIterable())
-fun CharPred(pred: (Char) -> Boolean): Parser<Unit> = Intrinsics.CharPred(pred)
+fun CharIn(chars: Iterable<Char>): Parser<Char> = Intrinsics.CharIn(chars)
+fun CharIn(chars: String): Parser<Char> = Intrinsics.CharIn(chars.asIterable())
+fun CharPred(pred: (Char) -> Boolean): Parser<Char> = Intrinsics.CharPred(pred)
 fun WhileCharIn(chars: Iterable<Char>, min: Int = 1): Parser<Unit> = Intrinsics.WhileCharIn(chars, min)
 fun WhileCharIn(chars: String, min: Int = 1): Parser<Unit> = Intrinsics.WhileCharIn(chars.asIterable(), min)
 
