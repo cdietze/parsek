@@ -8,7 +8,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class JsonPerfTest {
-    val jsonString = File("src/test/resources/test.json").readText()
+    val jsonString = File("src/jvmTest/resources/test.json").readText()
 
     val warmupCycles = 100
     val testCycles = 100
