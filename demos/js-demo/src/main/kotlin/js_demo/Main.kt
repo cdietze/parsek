@@ -1,3 +1,5 @@
+package js_demo
+
 import kotlinx.html.dom.append
 import kotlinx.html.js.button
 import kotlinx.html.js.input
@@ -5,7 +7,18 @@ import kotlinx.html.js.onClickFunction
 import kotlinx.html.js.p
 import org.w3c.dom.HTMLElement
 import org.w3c.dom.HTMLInputElement
-import parsek.*
+import parsek.CharIn
+import parsek.End
+import parsek.P
+import parsek.Parser
+import parsek.Rule
+import parsek.WhileCharIn
+import parsek.capture
+import parsek.map
+import parsek.opt
+import parsek.plus
+import parsek.rep
+import parsek.times
 import kotlin.browser.document
 
 val int: Parser<Int> = Rule("int") { (CharIn("+-").opt() * WhileCharIn("0123456789")).capture().map { it.toInt() } }
