@@ -10,3 +10,5 @@ pluginManagement {
 rootProject.name = 'parsek'
 
 enableFeaturePreview('GRADLE_METADATA')
+
+include 'demos:js-demo'
