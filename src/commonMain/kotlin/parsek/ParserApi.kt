@@ -58,7 +58,7 @@ operator fun <A, B> Parser<A>.times(b: Parser<B>): Parser<Pair<A, B>> = Combinat
 
 operator fun <A> Parser<A>.plus(b: Parser<A>): Parser<A> = Combinators.Either(listOf(this, b))
 
-fun <A> Parser<A>.not(): Parser<Unit> = Combinators.Not(this)
+operator fun <A> Parser<A>.not(): Parser<Unit> = Combinators.Not(this)
 
 fun <A> NamedParser<A>.log(output: (String) -> Unit = ::println): Parser<A> =
     Combinators.Logged(this, name, output)
