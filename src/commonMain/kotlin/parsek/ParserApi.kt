@@ -42,16 +42,16 @@ fun WhileCharIn(chars: String, min: Int = 1): Parser<Unit> = Intrinsics.WhileCha
 fun Parser<Any?>.capture(): Parser<String> = Combinators.Capturing(this)
 
 @JvmName("\$timesUU")
-operator fun Parser<Unit>.times(b: Parser<Unit>): Parser<Unit> =
-    Combinators.Seq(this, b).map<Pair<Unit, Unit>, Unit> { Unit }
+operator fun Parser<Unit?>.times(b: Parser<Unit?>): Parser<Unit> =
+    Combinators.Seq(this, b).map<Pair<Unit?, Unit?>, Unit> { Unit }
 
 @JvmName("\$timesUA")
-operator fun <A> Parser<Unit>.times(b: Parser<A>): Parser<A> =
-    Combinators.Seq(this, b).map<Pair<Unit, A>, A> { it.second }
+operator fun <A> Parser<Unit?>.times(b: Parser<A>): Parser<A> =
+    Combinators.Seq(this, b).map<Pair<Unit?, A>, A> { it.second }
 
 @JvmName("\$timesAU")
-operator fun <A> Parser<A>.times(b: Parser<Unit>): Parser<A> =
-    Combinators.Seq(this, b).map<Pair<A, Unit>, A> { it.first }
+operator fun <A> Parser<A>.times(b: Parser<Unit?>): Parser<A> =
+    Combinators.Seq(this, b).map<Pair<A, Unit?>, A> { it.first }
 
 @JvmName("\$timesAB")
 operator fun <A, B> Parser<A>.times(b: Parser<B>): Parser<Pair<A, B>> = Combinators.Seq(this, b)

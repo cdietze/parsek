@@ -26,4 +26,7 @@ object TypeTests {
 
     fun <A, B, C, D> map4(a: Parser<A>, b: Parser<B>, c: Parser<C>, d: Parser<D>): Parser<Int> =
         (a * b * c * d).map { _: A, _: B, _: C, _: D -> 0 }
+
+    fun shouldBeAbleToSkipOpt(numParser: Parser<Int>): Parser<Int> =
+        P("x").opt() * numParser * P("y").opt()
 }
