@@ -1,9 +1,9 @@
 package parsek
 
-import org.junit.Ignore
-import org.junit.Test
 import java.io.File
 import kotlin.system.measureTimeMillis
+import kotlin.test.Ignore
+import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
