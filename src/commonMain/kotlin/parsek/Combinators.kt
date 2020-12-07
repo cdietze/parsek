@@ -3,7 +3,7 @@ package parsek
 import parsek.MutableParseResult.MutableFailure
 import parsek.MutableParseResult.MutableSuccess
 
-object Combinators {
+internal object Combinators {
 
     data class Mapped<A, out B>(val p: Parser<A>, val f: (A) -> B) : ParserImpl<B>() {
         override fun parseRec(ctx: ParserCtx, index: Int): MutableParseResult {

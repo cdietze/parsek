@@ -15,14 +15,14 @@ abstract class Parser<out T> {
      * It uses a mutable [ParserCtx] that is passed to recursive [parseRec] calls. Thus avoids
      * object allocations (e.g. for [ParseResult.Success] and [ParseResult.Failure] instances.
      */
-    abstract fun parseRec(ctx: ParserCtx, index: Int): MutableParseResult
+    internal abstract fun parseRec(ctx: ParserCtx, index: Int): MutableParseResult
 }
 
 abstract class NamedParser<out T> : Parser<T>() {
     abstract val name: String
 }
 
-fun <T, R> Parser<T>.map(f: (T) -> R) = Combinators.Mapped(this, f)
+fun <T, R> Parser<T>.map(f: (T) -> R): Parser<R> = Combinators.Mapped(this, f)
 fun <T, R> Parser<T>.flatMap(f: (T) -> Parser<R>): Parser<R> = Combinators.FlatMapped(this, f)
 fun <T> Parser<T>.filter(pred: (T) -> Boolean): Parser<T> = Combinators.Filtered(this, pred)
 
