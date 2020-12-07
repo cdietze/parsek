@@ -1,6 +1,6 @@
 package parsek
 
-object Intrinsics {
+internal object Intrinsics {
     // TODO optimize using a BitSet
     data class CharIn(val chars: Iterable<Char>) : ParserImpl<Char>() {
         override fun parseRec(ctx: ParserCtx, index: Int): MutableParseResult {

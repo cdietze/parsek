@@ -1,6 +1,6 @@
 package parsek
 
-object Terminals {
+internal object Terminals {
     /**
      * Succeeds when at the start of the input (i.e., index equals 0), fails otherwise.
      */

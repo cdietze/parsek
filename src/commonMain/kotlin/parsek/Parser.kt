@@ -4,7 +4,7 @@ package parsek
  * Extension interface of [Parser] with some utility functions that
  * should not be part of the public API.
  */
-abstract class ParserImpl<out T> : Parser<T>() {
+internal abstract class ParserImpl<out T> : Parser<T>() {
 
     fun <A> succeed(ctx: ParserCtx, value: A, index: Int, cut: Boolean = false): MutableParseResult.MutableSuccess {
         return ctx.success.apply {
@@ -63,7 +63,7 @@ fun <T> ParseResult<T>.getOrFail(): ParseResult.Success<T> = when (this) {
  * Contains constants that are valid during the whole parse (e.g., [input])
  * and mutable instances that may be reused to avoid object allocations.
  */
-data class ParserCtx(
+internal data class ParserCtx(
     /** The input string that is processed during this parse.
      * This does not change throughout this parse. */
     val input: String,
@@ -78,7 +78,7 @@ data class ParserCtx(
  * The mutable sibling of [ParseResult],
  * it this is used during recursive [Parser.parseRec] calls to avoid object allocations.
  */
-sealed class MutableParseResult {
+internal sealed class MutableParseResult {
     abstract fun <A> toResult(): ParseResult<A>
 
     data class MutableSuccess(
