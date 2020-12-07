@@ -48,4 +48,24 @@ internal object Intrinsics {
             return "WhileCharIn(...)"
         }
     }
+
+    data class WhileCharPred(val min: Int, val pred: (Char) -> Boolean) : ParserImpl<Unit>() {
+        override fun parseRec(ctx: ParserCtx, index: Int): MutableParseResult {
+            var curIndex = index
+            while (curIndex < ctx.input.length && pred(ctx.input[curIndex])) {
+                curIndex++
+            }
+            return if (curIndex - index >= min) {
+                succeed(ctx, Unit, curIndex)
+            } else {
+                fail(ctx, index)
+            }
+        }
+
+        override fun toString(): String {
+            // TODO (toString): Append [pred] in readable way
+            // TODO (toString): Append non-default parameters
+            return "WhileCharPred(...)"
+        }
+    }
 }

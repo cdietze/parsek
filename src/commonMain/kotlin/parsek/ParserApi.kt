@@ -38,6 +38,7 @@ fun CharIn(chars: String): Parser<Char> = Intrinsics.CharIn(chars.asIterable())
 fun CharPred(pred: (Char) -> Boolean): Parser<Char> = Intrinsics.CharPred(pred)
 fun WhileCharIn(chars: Iterable<Char>, min: Int = 1): Parser<Unit> = Intrinsics.WhileCharIn(chars, min)
 fun WhileCharIn(chars: String, min: Int = 1): Parser<Unit> = Intrinsics.WhileCharIn(chars.asIterable(), min)
+fun WhileCharPred(min: Int = 1, pred: (Char) -> Boolean): Parser<Unit> = Intrinsics.WhileCharPred(min, pred)
 
 fun Parser<Any?>.capture(): Parser<String> = Combinators.Capturing(this)
 
